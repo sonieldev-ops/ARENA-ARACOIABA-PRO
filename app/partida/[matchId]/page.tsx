@@ -108,83 +108,81 @@ export default function PublicMatchPage() {
         </div>
 
         {/* Placar Premium */}
-        <div className="relative overflow-hidden bg-gradient-to-b from-zinc-900 to-black rounded-[3rem] p-8 md:p-12 border border-white/5 shadow-2xl">
+        <div className="relative overflow-hidden bg-zinc-900/50 backdrop-blur-md rounded-[2.5rem] p-6 md:p-12 border border-white/5 shadow-2xl">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#FACC15]/5 theme-shadow-primary blur-[100px] rounded-full pointer-events-none" />
           
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="relative z-10 flex flex-col items-center justify-center gap-8">
             
-            {/* Team A */}
-            <div className="flex flex-col items-center gap-6 flex-1 group">
-              <div className="relative">
-                <div className="w-24 h-24 md:w-32 md:h-32 bg-zinc-950 rounded-[2.5rem] flex items-center justify-center border-2 border-white/5 group-hover:border-[#FACC15]/30 group-hover:theme-border-primary transition-all">
-                  <span className="text-3xl md:text-4xl font-black text-zinc-800 group-hover:text-[#FACC15] group-hover:theme-primary transition-colors">
-                    {match.teamAName?.substring(0, 2).toUpperCase()}
-                  </span>
+            <div className="flex w-full items-center justify-between gap-2 md:gap-12">
+              {/* Team A */}
+              <div className="flex flex-col items-center gap-4 flex-1 group">
+                <div className="relative">
+                  <div className="w-20 h-20 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center border-4 border-zinc-800 group-hover:border-[#FACC15]/50 transition-all overflow-hidden shadow-xl">
+                    <span className="text-2xl md:text-4xl font-black text-black">
+                      {match.teamAName?.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleFavoriteClick(match.teamAId, match.teamAName)}
+                    className={`absolute -top-1 -right-1 p-2 rounded-full border transition-all ${
+                      isFavorite(match.teamAId)
+                      ? 'bg-[#FACC15] border-[#FACC15] text-black scale-110 shadow-lg shadow-[#FACC15]/20'
+                      : 'bg-zinc-900/80 border-white/10 text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {isFavorite(match.teamAId) ? <Bell className="w-3 h-3 fill-current" /> : <BellOff className="w-3 h-3" />}
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleFavoriteClick(match.teamAId, match.teamAName)}
-                  className={`absolute -top-2 -right-2 p-3 rounded-2xl border transition-all ${
-                    isFavorite(match.teamAId) 
-                    ? 'bg-[#FACC15] border-[#FACC15] text-black scale-110 shadow-lg shadow-[#FACC15]/20 btn-custom-primary'
-                    : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-white'
-                  }`}
-                >
-                  {isFavorite(match.teamAId) ? <Bell className="w-4 h-4 fill-current" /> : <BellOff className="w-4 h-4" />}
-                </button>
+                <h2 className="font-black text-sm md:text-2xl uppercase italic text-center leading-tight tracking-tighter truncate max-w-[120px] md:max-w-none">
+                  {match.teamAName}
+                </h2>
               </div>
-              <h2 className="font-black text-xl md:text-2xl uppercase italic text-center leading-tight tracking-tighter">
-                {match.teamAName}
-              </h2>
-            </div>
 
-            {/* Score Center */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="flex gap-2 mb-2">
-                {match.currentPeriod && (
-                   <Badge className="bg-blue-600 text-white border-none px-3 py-1 font-black text-[10px]">
-                      {match.currentPeriod === '1T' ? '1º TEMPO' : match.currentPeriod === '2T' ? '2º TEMPO' : match.currentPeriod}
-                   </Badge>
-                )}
-                {match.stoppageTime > 0 && (
-                   <Badge className="bg-red-600 text-white border-none px-3 py-1 font-black text-[10px] animate-pulse">
-                      +{match.stoppageTime} MIN
-                   </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-6">
-                <span className="text-7xl md:text-8xl font-black italic tracking-tighter tabular-nums">{match.scoreA}</span>
-                <span className="text-zinc-800 text-4xl font-black">:</span>
-                <span className="text-7xl md:text-8xl font-black italic tracking-tighter tabular-nums">{match.scoreB}</span>
-              </div>
-              <Badge className={`px-6 py-2 font-black rounded-full text-[10px] tracking-[0.2em] border-none ${
-                match.status === 'LIVE' ? 'bg-red-600 text-white animate-pulse' : 'bg-zinc-800 text-zinc-400'
-              }`}>
-                {match.status === 'LIVE' ? 'AO VIVO' : match.status === 'FINISHED' ? 'FINALIZADO' : 'AGENDADO'}
-              </Badge>
-            </div>
-
-            {/* Team B */}
-            <div className="flex flex-col items-center gap-6 flex-1 group">
-              <div className="relative">
-                <div className="w-24 h-24 md:w-32 md:h-32 bg-zinc-950 rounded-[2.5rem] flex items-center justify-center border-2 border-white/5 group-hover:border-[#FACC15]/30 group-hover:theme-border-primary transition-all">
-                  <span className="text-3xl md:text-4xl font-black text-zinc-800 group-hover:text-[#FACC15] group-hover:theme-primary transition-colors">
-                    {match.teamBName?.substring(0, 2).toUpperCase()}
-                  </span>
+              {/* Score Center */}
+              <div className="flex flex-col items-center gap-2 md:gap-4">
+                <div className="flex flex-col items-center gap-1">
+                  {match.currentPeriod && (
+                    <Badge className="bg-blue-600 text-white border-none px-2 py-0.5 md:px-3 md:py-1 font-black text-[8px] md:text-[10px]">
+                        {match.currentPeriod === '1T' ? '1º TEMPO' : match.currentPeriod === '2T' ? '2º TEMPO' : match.currentPeriod}
+                    </Badge>
+                  )}
+                  <div className="flex items-center gap-3 md:gap-6">
+                    <span className="text-5xl md:text-8xl font-black italic tracking-tighter tabular-nums leading-none">{match.scoreA}</span>
+                    <span className="text-zinc-800 text-2xl md:text-4xl font-black">:</span>
+                    <span className="text-5xl md:text-8xl font-black italic tracking-tighter tabular-nums leading-none">{match.scoreB}</span>
+                  </div>
+                  <Badge className={cn(
+                    "px-4 py-1 md:px-6 md:py-2 font-black rounded-full text-[8px] md:text-[10px] tracking-[0.2em] border-none shadow-lg",
+                    match.status === 'LIVE' ? 'bg-red-600 text-white animate-pulse' : 'bg-zinc-800 text-zinc-400'
+                  )}>
+                    {match.status === 'LIVE' ? 'AO VIVO' : match.status === 'FINISHED' ? 'FINALIZADO' : 'AGENDADO'}
+                  </Badge>
                 </div>
-                <button 
-                  onClick={() => handleFavoriteClick(match.teamBId, match.teamBName)}
-                  className={`absolute -top-2 -right-2 p-3 rounded-2xl border transition-all ${
-                    isFavorite(match.teamBId) 
-                    ? 'bg-[#FACC15] border-[#FACC15] text-black scale-110 shadow-lg shadow-[#FACC15]/20 btn-custom-primary'
-                    : 'bg-zinc-900 border-white/5 text-zinc-500 hover:text-white'
-                  }`}
-                >
-                  {isFavorite(match.teamBId) ? <Bell className="w-4 h-4 fill-current" /> : <BellOff className="w-4 h-4" />}
-                </button>
               </div>
-              <h2 className="font-black text-xl md:text-2xl uppercase italic text-center leading-tight tracking-tighter">
-                {match.teamBName}
-              </h2>
+
+              {/* Team B */}
+              <div className="flex flex-col items-center gap-4 flex-1 group">
+                <div className="relative">
+                  <div className="w-20 h-20 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center border-4 border-zinc-800 group-hover:border-[#FACC15]/50 transition-all overflow-hidden shadow-xl">
+                    <span className="text-2xl md:text-4xl font-black text-black">
+                      {match.teamBName?.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleFavoriteClick(match.teamBId, match.teamBName)}
+                    className={`absolute -top-1 -right-1 p-2 rounded-full border transition-all ${
+                      isFavorite(match.teamBId)
+                      ? 'bg-[#FACC15] border-[#FACC15] text-black scale-110 shadow-lg shadow-[#FACC15]/20'
+                      : 'bg-zinc-900/80 border-white/10 text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {isFavorite(match.teamBId) ? <Bell className="w-3 h-3 fill-current" /> : <BellOff className="w-3 h-3" />}
+                  </button>
+                </div>
+                <h2 className="font-black text-sm md:text-2xl uppercase italic text-center leading-tight tracking-tighter truncate max-w-[120px] md:max-w-none">
+                  {match.teamBName}
+                </h2>
+              </div>
             </div>
 
           </div>
