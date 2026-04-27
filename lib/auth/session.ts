@@ -16,7 +16,7 @@ export async function verifySessionCookieValue(sessionCookie: string) {
 export async function getSessionUser(): Promise<UserSession | null> {
   const store = await cookies();
   const sessionCookie = store.get(SESSION_COOKIE_NAME)?.value;
-  if (!sessionCookie) return null;
+  if (!sessionCookie || !adminAuth) return null;
 
   try {
     // Verificamos a revogação para garantir que sessões banidas caiam rapidamente
