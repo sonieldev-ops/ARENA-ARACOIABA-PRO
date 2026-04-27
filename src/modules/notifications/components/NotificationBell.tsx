@@ -3,7 +3,7 @@ import { Bell } from 'lucide-react';
 import { NotificationBadge } from './NotificationBadge';
 import { NotificationDropdown } from './NotificationDropdown';
 import { useUnreadCount } from '../hooks/useUnreadCount';
-import { useAuth } from '@/hooks/useAuth'; // Assumindo que existe
+import { useAuth } from '@/src/modules/auth/context/AuthContext';
 
 export const NotificationBell: React.FC = () => {
   const { user } = useAuth();

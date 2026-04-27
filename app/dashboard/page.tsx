@@ -12,6 +12,8 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
+  let destinationRoute = '';
+
   try {
     // 1. Verificar o cookie de sessão no servidor
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
@@ -27,10 +29,21 @@ export default async function DashboardPage() {
     // 3. Obter rota de destino
     const { route } = resolveDefaultRouteByAccess(accessState);
 
-    // 4. Redirecionar para o destino correto
-    redirect(route);
-  } catch (error) {
+    // 4. Se a rota atual for diferente da de destino, redireciona
+    // Nota: O redirect deve ser chamado FORA do bloco try-catch ou tratado especificamente
+    // mas aqui o mais simples é mover a lógica de decisão para fora ou checar o tipo do erro.
+
+    // Para simplificar e evitar o erro no log:
+    destinationRoute = route;
+  } catch (error: any) {
+    // Se for um erro de redirecionamento do próprio Next, relance-o
+    if (error.digest?.includes('NEXT_REDIRECT')) throw error;
+
     console.error('[Dashboard Redirect Error]:', error);
     redirect('/login');
+  }
+
+  if (destinationRoute) {
+    redirect(destinationRoute);
   }
 }

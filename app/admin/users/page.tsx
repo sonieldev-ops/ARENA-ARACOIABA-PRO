@@ -3,37 +3,41 @@
 import { useUsersAdmin } from '@/src/modules/users/hooks/useUsersAdmin';
 import { UsersTable } from '@/src/modules/users/components/UsersTable';
 import { UserAdminRow } from '@/src/modules/users/types/user-admin.types';
+import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function AdminUsersPage() {
-  const { users, loading, handleApprove, handleReject, handleChangeAccess, handleBulkApprove } = useUsersAdmin();
+  const { users, loading, refresh, actions } = useUsersAdmin();
 
-  const actions = {
-    onApprove: (user: UserAdminRow) => handleApprove(user.uid),
+  const tableActions = {
+    onApprove: (user: UserAdminRow) => actions.approve(user.uid),
     onReject: (user: UserAdminRow) => {
       const reason = prompt('Motivo da rejeição:');
-      if (reason) handleReject(user.uid, reason);
+      if (reason) actions.reject(user.uid, reason);
     },
     onChangeAccess: (user: UserAdminRow) => {
-      // Aqui poderíamos abrir um modal, por enquanto simplificado
+      // Aqui poderíamos abrir o modal de detalhes ou o de troca rápida
       console.log('Change access for', user.uid);
-    },
-    onBulkApprove: handleBulkApprove
+    }
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Gestão de Usuários</h1>
-        <p className="text-muted-foreground">
-          Gerencie permissões, aprove novos acessos e monitore o status dos usuários da plataforma.
-        </p>
-      </div>
-
-      <UsersTable
-        data={users}
-        loading={loading}
-        actions={actions}
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <AdminPageHeader
+        title="Gestão de Usuários"
+        subtitle="Gerencie permissões, aprove novos acessos e monitore o status dos usuários da plataforma."
       />
+
+      <Card className="bg-slate-900 border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <CardContent className="p-6">
+          <UsersTable
+            data={users}
+            loading={loading}
+            actions={tableActions}
+            onRefresh={refresh}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

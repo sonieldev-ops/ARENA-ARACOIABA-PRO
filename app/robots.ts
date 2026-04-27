@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/', '/login'],
     },
-    sitemap: 'https://arenaaracoiaba.com.br/sitemap.xml',
+    sitemap: 'https://meu-projeto-ten-rose.vercel.app/sitemap.xml',
   };
 }

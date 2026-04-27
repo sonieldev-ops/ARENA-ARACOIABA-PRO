@@ -1,6 +1,6 @@
 import { AdminDashboardMetrics } from "../types/admin-dashboard.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, UserCheck, UserClock, ShieldAlert, Activity } from "lucide-react";
+import { Users, UserCheck, Clock, ShieldAlert, Activity } from "lucide-react";
 
 export function AdminKpiCards({ metrics }: { metrics: AdminDashboardMetrics }) {
   const cards = [
@@ -15,7 +15,7 @@ export function AdminKpiCards({ metrics }: { metrics: AdminDashboardMetrics }) {
     {
       title: "Pendentes",
       value: metrics.pendingUsers,
-      icon: UserClock,
+      icon: Clock,
       color: "text-amber-600",
       bg: "bg-amber-50",
       description: "Aguardando aprovação",

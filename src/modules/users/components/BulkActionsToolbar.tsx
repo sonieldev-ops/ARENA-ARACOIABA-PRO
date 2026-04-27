@@ -36,20 +36,23 @@ export function BulkActionsToolbar({
   if (count === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-6 border border-slate-700 backdrop-blur-md bg-opacity-95">
-        <div className="flex items-center gap-3 pr-6 border-r border-slate-700">
-          <span className="bg-blue-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+    <div className="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-8 duration-500">
+      <div className="bg-zinc-950/90 text-white px-8 py-4 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center gap-8 border border-zinc-800 backdrop-blur-xl">
+        <div className="flex items-center gap-4 pr-8 border-r border-zinc-800">
+          <span className="bg-blue-600 text-white w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shadow-[0_0_15px_rgba(37,99,235,0.4)] transform -rotate-6">
             {count}
           </span>
-          <span className="text-sm font-medium">Usuários selecionados</span>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Selecionados</span>
+            <span className="text-xs font-bold text-white">Gestão em Massa</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
-            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-400/10 gap-2 h-9 rounded-full"
+            className="text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 gap-2 h-11 px-5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
             onClick={onApprove}
           >
             <CheckCircle className="w-4 h-4" />
@@ -59,7 +62,7 @@ export function BulkActionsToolbar({
           <Button
             variant="ghost"
             size="sm"
-            className="text-red-400 hover:text-red-300 hover:bg-red-400/10 gap-2 h-9 rounded-full"
+            className="text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 gap-2 h-11 px-5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
             onClick={onReject}
           >
             <XCircle className="w-4 h-4" />
@@ -71,31 +74,31 @@ export function BulkActionsToolbar({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-slate-300 hover:text-white hover:bg-white/10 gap-2 h-9 rounded-full"
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 gap-2 h-11 px-5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all"
               >
                 <ShieldAlert className="w-4 h-4" />
                 Acesso
                 <ChevronDown className="w-3 h-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-slate-900 border-slate-700 text-slate-200">
-              <DropdownMenuItem onClick={onChangeAccess} className="gap-2 focus:bg-slate-800 focus:text-white cursor-pointer">
+            <DropdownMenuContent align="end" className="w-56 bg-zinc-950 border-zinc-800 text-zinc-300 rounded-2xl p-2 shadow-2xl">
+              <DropdownMenuItem onClick={onChangeAccess} className="gap-3 focus:bg-zinc-900 rounded-xl px-4 py-3 cursor-pointer">
                 <UserCog className="w-4 h-4" />
-                Alterar Perfil / Status
+                <span className="font-bold text-xs uppercase tracking-wider">Alterar Perfil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2 text-red-400 focus:bg-red-400/10 focus:text-red-300 cursor-pointer">
+              <DropdownMenuItem className="gap-3 text-rose-500 focus:bg-rose-500/5 focus:text-rose-400 rounded-xl px-4 py-3 cursor-pointer">
                 <Trash2 className="w-4 h-4" />
-                Desativar em Massa
+                <span className="font-bold text-xs uppercase tracking-wider">Desativar</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <div className="pl-6 border-l border-slate-700">
+        <div className="pl-8 border-l border-zinc-800">
           <Button
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white hover:bg-white/5 h-9 rounded-full"
+            className="text-zinc-600 hover:text-white hover:bg-transparent h-11 px-4 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-colors"
             onClick={onClearSelection}
           >
             Cancelar

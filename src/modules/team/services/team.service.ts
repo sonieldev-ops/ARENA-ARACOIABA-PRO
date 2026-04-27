@@ -12,13 +12,14 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase/client';
+import { removeUndefined } from '@/src/lib/utils';
 import { Team, TeamMember, TeamInvite, Competition, TeamDashboardData } from '../types/team.types';
 
 export class TeamService {
   // 1. Buscar Dados do Dashboard
   async getDashboardData(managerUid: string): Promise<TeamDashboardData> {
     // Buscar time onde o usuário é Manager
-    const teamsRef = collection(db, 'teams');
+    const teamsRef = collection(db, 'times');
     const qTeam = query(teamsRef, where('managerId', '==', managerUid));
     const teamSnap = await getDocs(qTeam);
 
@@ -52,14 +53,14 @@ export class TeamService {
   // 2. Enviar Convite
   async sendInvite(team: Team, email: string, role: string): Promise<void> {
     const invitesRef = collection(db, 'teamInvites');
-    await addDoc(invitesRef, {
+    await addDoc(invitesRef, removeUndefined({
       teamId: team.id,
       teamName: team.name,
       invitedEmail: email,
       role,
       status: 'PENDING',
       createdAt: serverTimestamp()
-    });
+    }));
   }
 
   // 3. Remover Jogador do Elenco
@@ -68,18 +69,18 @@ export class TeamService {
     await deleteDoc(memberDoc);
 
     // Também remover o teamId do perfil do usuário para consistência
-    const userRef = doc(db, 'users', userId);
-    await updateDoc(userRef, { teamId: null });
+    const userRef = doc(db, 'usuarios', userId);
+    await updateDoc(userRef, removeUndefined({ teamId: null }));
   }
 
   // 4. Inscrição em Campeonato
   async registerInCompetition(teamId: string, competitionId: string): Promise<void> {
     const regRef = collection(db, `competitions/${competitionId}/registrations`);
-    await addDoc(regRef, {
+    await addDoc(regRef, removeUndefined({
       teamId,
       registeredAt: serverTimestamp(),
       status: 'PENDING_PAYMENT'
-    });
+    }));
   }
 }
 

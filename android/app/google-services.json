@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "60888820883",
+    "project_id": "arena-aracoiaba-pro",
+    "storage_bucket": "arena-aracoiaba-pro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:60888820883:android:e22c4e5ece74f13ef87166",
+        "android_client_info": {
+          "package_name": "com.arena.aracoiabapro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIQaMdeX6g1z9gfp3XuhuKcW5F74MmB14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

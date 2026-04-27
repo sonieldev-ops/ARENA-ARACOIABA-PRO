@@ -10,6 +10,7 @@ import {
   orderBy,
   Timestamp
 } from "firebase/firestore";
+import { toast } from "sonner";
 import { liveMatchService } from "../infrastructure/live-match.service";
 
 export function useLiveControl(matchId: string) {
@@ -22,7 +23,7 @@ export function useLiveControl(matchId: string) {
   // 1. Listen Match Realtime
   useEffect(() => {
     if (!matchId) return;
-    const unsub = onSnapshot(doc(db, "matches", matchId), (snap) => {
+    const unsub = onSnapshot(doc(db, "partidas", matchId), (snap) => {
       if (snap.exists()) {
         setMatch({ id: snap.id, ...snap.data() });
       }
@@ -35,7 +36,7 @@ export function useLiveControl(matchId: string) {
   useEffect(() => {
     if (!matchId) return;
     const q = query(
-      collection(db, "matches", matchId, "events"),
+      collection(db, "partidas", matchId, "events"),
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) => {
@@ -97,11 +98,39 @@ export function useLiveControl(matchId: string) {
     isLive,
     isScheduled,
     isFinished,
-    startMatch: () => wrapAction(() => liveMatchService.startMatch(matchId)),
-    finishMatch: () => wrapAction(() => liveMatchService.finishMatch(matchId)),
+    startMatch: async () => {
+      try {
+        await wrapAction(() => liveMatchService.startMatch(matchId));
+        toast.success("Partida iniciada!");
+      } catch (e: any) {
+        toast.error("Erro ao iniciar partida");
+      }
+    },
+    finishMatch: async () => {
+      try {
+        await wrapAction(() => liveMatchService.finishMatch(matchId));
+        toast.success("Partida finalizada!");
+      } catch (e: any) {
+        toast.error("Erro ao finalizar partida");
+      }
+    },
     registerGoal: (side: 'A' | 'B', athlete?: any) =>
-      wrapAction(() => liveMatchService.registerGoal(matchId, side, athlete, currentMinute)),
+      wrapAction(async () => {
+        try {
+          await liveMatchService.registerGoal(matchId, side, athlete, currentMinute, match);
+          toast.success(`GOL!`);
+        } catch (e: any) {
+          toast.error("Erro ao registrar gol");
+        }
+      }),
     registerCard: (type: 'YELLOW' | 'RED', side: 'A' | 'B', athlete?: any) =>
-      wrapAction(() => liveMatchService.registerCard(matchId, type, side, athlete, currentMinute))
+      wrapAction(async () => {
+        try {
+          await liveMatchService.registerCard(matchId, type, side, athlete, currentMinute, match);
+          toast.success(`Cartão registrado!`);
+        } catch (e: any) {
+          toast.error("Erro ao registrar cartão");
+        }
+      })
   };
 }

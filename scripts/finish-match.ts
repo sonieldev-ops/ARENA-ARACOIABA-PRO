@@ -27,7 +27,7 @@ const adminDb = getFirestore(adminApp);
 async function finishMatch(matchId: string) {
   console.log(`🏁 Finalizando partida: ${matchId}...`);
 
-  const matchRef = adminDb.collection("matches").doc(matchId);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
   const matchDoc = await matchRef.get();
 
   if (!matchDoc.exists) {
@@ -54,4 +54,4 @@ async function finishMatch(matchId: string) {
 }
 
 // Finaliza a partida de teste
-finishMatch("match-live-01").catch(console.error);
+finishMatch("match-live-02").catch(console.error);

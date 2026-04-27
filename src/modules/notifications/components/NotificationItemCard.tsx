@@ -38,6 +38,14 @@ export const NotificationItemCard: React.FC<NotificationItemCardProps> = ({
 }) => {
   const isUnread = !notification.isRead;
 
+  const getCreatedAt = () => {
+    if (!notification.createdAt) return new Date();
+    if (typeof (notification.createdAt as any).toDate === 'function') {
+      return (notification.createdAt as any).toDate();
+    }
+    return new Date(notification.createdAt as any);
+  };
+
   return (
     <div
       onClick={() => onClick?.(notification)}
@@ -59,7 +67,7 @@ export const NotificationItemCard: React.FC<NotificationItemCardProps> = ({
             {notification.title}
           </h4>
           <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-            {formatDistanceToNow(notification.createdAt.toDate(), { addSuffix: true, locale: ptBR })}
+            {formatDistanceToNow(getCreatedAt(), { addSuffix: true, locale: ptBR })}
           </span>
         </div>
         <p className={`text-sm line-clamp-2 ${isUnread ? 'text-gray-800' : 'text-gray-500'}`}>

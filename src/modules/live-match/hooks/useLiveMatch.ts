@@ -13,7 +13,7 @@ export function useLiveMatch(matchId: string) {
     if (!matchId) return;
 
     // Listener para dados básicos e placar da partida
-    const unsubMatch = onSnapshot(doc(db, "matches", matchId), (snap) => {
+    const unsubMatch = onSnapshot(doc(db, "partidas", matchId), (snap) => {
       if (snap.exists()) {
         setMatch({ id: snap.id, ...snap.data() });
       }
@@ -22,7 +22,7 @@ export function useLiveMatch(matchId: string) {
 
     // Listener para a Timeline de eventos (Gols, Cartões, etc)
     const eventsQuery = query(
-      collection(db, "matches", matchId, "events"),
+      collection(db, "partidas", matchId, "events"),
       orderBy("minute", "desc"),
       orderBy("createdAt", "desc")
     );

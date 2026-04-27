@@ -27,7 +27,7 @@ const adminDb = getFirestore(adminApp);
 async function fixUser() {
   console.log("🔍 Buscando usuários para vincular ao novo campeonato...");
 
-  const usersSnapshot = await adminDb.collection("users").get();
+  const usersSnapshot = await adminDb.collection("usuarios").get();
 
   if (usersSnapshot.empty) {
     console.log("⚠️ Nenhum usuário encontrado para atualizar.");

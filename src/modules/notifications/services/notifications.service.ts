@@ -15,7 +15,8 @@ import {
   increment,
   setDoc
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db } from '@/src/lib/firebase/client';
+import { removeUndefined } from '@/src/lib/utils';
 import { NotificationItem, NotificationFilterState, NotificationCounters } from '../types/notification.types';
 
 const NOTIFICATIONS_COLLECTION = 'notifications';
@@ -104,16 +105,16 @@ export const notificationsService = {
     const metaRef = doc(db, `users/${userId}/metadata/notifications`);
 
     const batch = writeBatch(db);
-    batch.update(docRef, {
+    batch.update(docRef, removeUndefined({
       isRead: true,
       readAt: Timestamp.now()
-    });
+    }));
 
     // Decrement unread count atomically
-    batch.set(metaRef, {
+    batch.set(metaRef, removeUndefined({
       unreadCount: increment(-1),
       lastUpdatedAt: Timestamp.now()
-    }, { merge: true });
+    }), { merge: true });
 
     await batch.commit();
   },
@@ -136,14 +137,14 @@ export const notificationsService = {
 
     const batch = writeBatch(db);
     snapshot.docs.forEach(d => {
-      batch.update(d.ref, { isRead: true, readAt: Timestamp.now() });
+      batch.update(d.ref, removeUndefined({ isRead: true, readAt: Timestamp.now() }));
     });
 
     const metaRef = doc(db, `users/${userId}/metadata/notifications`);
-    batch.set(metaRef, {
+    batch.set(metaRef, removeUndefined({
       unreadCount: 0,
       lastUpdatedAt: Timestamp.now()
-    }, { merge: true });
+    }), { merge: true });
 
     await batch.commit();
   }

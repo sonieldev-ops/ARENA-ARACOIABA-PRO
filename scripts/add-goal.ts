@@ -27,7 +27,7 @@ const adminDb = getFirestore(adminApp);
 async function addGoal(matchId: string, team: 'A' | 'B') {
   console.log(`⚽ Registrando novo GOL para o Time ${team}...`);
 
-  const matchRef = adminDb.collection("matches").doc(matchId);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
   const matchDoc = await matchRef.get();
 
   if (!matchDoc.exists) {

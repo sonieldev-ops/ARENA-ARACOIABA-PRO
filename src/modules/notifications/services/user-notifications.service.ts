@@ -11,8 +11,9 @@ import {
   Timestamp,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { Notification } from '../types/notification.types';
+import { db } from '@/src/lib/firebase/client';
+import { removeUndefined } from '@/src/lib/utils';
+import { NotificationItem as Notification } from '../types/notification.types';
 
 export class UserNotificationsService {
   private collectionName = 'notifications';
@@ -37,10 +38,10 @@ export class UserNotificationsService {
    */
   async markAsRead(notificationId: string) {
     const ref = doc(db, this.collectionName, notificationId);
-    await updateDoc(ref, {
+    await updateDoc(ref, removeUndefined({
       isRead: true,
       readAt: serverTimestamp()
-    });
+    }));
   }
 
   /**

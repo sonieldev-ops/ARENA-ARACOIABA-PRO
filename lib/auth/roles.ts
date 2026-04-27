@@ -6,7 +6,7 @@ export const PUBLIC_ROUTES = [
   "/register",
   "/forgot-password",
   "/championships",
-  "/matches",
+  "/partidas",
   "/standings",
   "/teams",
   "/athletes",
@@ -15,25 +15,26 @@ export const PUBLIC_ROUTES = [
 
 export const ROLE_ROUTES: Record<UserRole, string[]> = {
   [UserRole.SUPER_ADMIN]: ["/admin", "/team", "/athlete"], // Acesso total
+  [UserRole.ADMIN]: ["/admin", "/team", "/athlete"], // Acesso administrativo total
   [UserRole.ORGANIZER]: [
-    "/admin/championships",
-    "/admin/teams",
-    "/admin/athletes",
-    "/admin/matches",
+    "/admin/campeonatos",
+    "/admin/times",
+    "/admin/atletas",
+    "/admin/partidas",
     "/admin/standings",
     "/admin/finance",
     "/admin/notifications",
     "/admin",
   ],
   [UserRole.REFEREE]: [
-    "/admin/matches",
+    "/admin/partidas",
     "/admin/standings",
     "/admin",
   ],
   [UserRole.STAFF]: [
-    "/admin/teams",
-    "/admin/athletes",
-    "/admin/matches",
+    "/admin/times",
+    "/admin/atletas",
+    "/admin/partidas",
     "/admin/notifications",
     "/admin",
   ],

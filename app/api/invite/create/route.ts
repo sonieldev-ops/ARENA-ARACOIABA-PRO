@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const actorUid = decodedToken.uid;
 
     // Buscar dados do ator (quem está convidando)
-    const actorDoc = await adminDb.collection("users").doc(actorUid).get();
+    const actorDoc = await adminDb.collection("usuarios").doc(actorUid).get();
     const actorData = actorDoc.data();
 
     // Regra: Apenas Managers do time ou Super Admins podem convidar
@@ -78,8 +78,24 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const inviteLink = `${appUrl}/invite/accept?id=${inviteRef.id}&token=${token}`;
 
-    // 6. Log de Auditoria
-    await adminDb.collection("adminAuditLogs").add({
+    // 6. Enviar E-mail (Resend)
+    let emailSent = false;
+    try {
+      const { sendInviteEmail } = await import("@/src/modules/invite/email/invite-email");
+      await sendInviteEmail({
+        to: email,
+        teamName: actorData?.teamName || "Time Oficial",
+        inviteLink,
+        invitedByName: actorData?.fullName || "Um Gestor"
+      });
+      emailSent = true;
+    } catch (emailError) {
+      console.error("Falha ao enviar e-mail:", emailError);
+      // Não bloqueamos o sucesso da API se apenas o e-mail falhar
+    }
+
+    // 7. Log de Auditoria
+    await adminDb.collection("logs_auditoria").add({
       action: "INVITE_CREATED",
       operatorName: actorData?.fullName,
       operatorUid: actorUid,
@@ -87,13 +103,14 @@ export async function POST(req: NextRequest) {
       targetUid: inviteRef.id,
       timestamp: FieldValue.serverTimestamp(),
       severity: "INFO",
-      details: `Convite enviado para ${email} entrar no time ${actorData?.teamName}`
+      details: `Convite enviado para ${email}. E-mail enviado: ${emailSent ? 'SIM' : 'FALHA'}`
     });
 
     return NextResponse.json({
       success: true,
       inviteId: inviteRef.id,
-      inviteLink
+      inviteLink,
+      emailSent
     });
 
   } catch (error: any) {

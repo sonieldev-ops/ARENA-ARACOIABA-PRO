@@ -1,5 +1,6 @@
 import { adminDb, adminAuth } from '@/lib/firebase/admin';
 import { UserRole, UserStatus } from '@/src/types/auth';
+import type { Transaction } from 'firebase-admin/firestore';
 
 /**
  * Incrementa a versão de acesso do usuário e sincroniza claims.
@@ -11,10 +12,11 @@ export async function bumpUserAccessVersion(uid: string, options: {
   isApproved?: boolean;
   revokeSessions?: boolean;
 }) {
-  const userRef = adminDb.collection('users').doc(uid);
+  const userRef = adminDb.collection('usuarios').doc(uid);
 
-  return adminDb.runTransaction(async (transaction) => {
-    const userDoc = await transaction.get(userRef);
+  return adminDb.runTransaction(async (transaction: Transaction) => {
+    // Usando unknown para evitar erro de casting entre QuerySnapshot e DocumentSnapshot no build
+    const userDoc = (await transaction.get(userRef)) as any;
     if (!userDoc.exists) throw new Error('Usuário não encontrado');
 
     const currentData = userDoc.data()!;

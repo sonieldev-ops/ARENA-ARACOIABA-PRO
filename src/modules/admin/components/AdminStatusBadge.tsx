@@ -1,4 +1,4 @@
-import { cn } from "@/src/lib/utils";
+import { cn, translateStatus } from "@/src/lib/utils";
 
 type StatusType = 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'FINISHED' | 'LIVE' | 'SCHEDULED' | 'BLOCKED' | 'APPROVED' | 'REJECTED';
 
@@ -19,14 +19,15 @@ export function AdminStatusBadge({ status }: AdminStatusBadgeProps) {
     REJECTED: "bg-red-900/10 text-red-400 border-red-900/20",
   };
 
-  const style = statusStyles[status] || statusStyles.PENDING;
+  const displayStatus = typeof status === 'string' ? status : 'INVALID';
+  const style = statusStyles[displayStatus] || statusStyles.PENDING;
 
   return (
     <span className={cn(
       "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border",
       style
     )}>
-      {status}
+      {translateStatus(displayStatus)}
     </span>
   );
 }

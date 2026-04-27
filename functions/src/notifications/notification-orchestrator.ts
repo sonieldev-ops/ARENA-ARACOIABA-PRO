@@ -22,14 +22,14 @@ export async function orchestrateAdminNotification(
   const notificationId = `notif_${metadata.correlationId}_${type}`;
 
   // 1. Verificar idempotência
-  const existingNotif = await db.collection('notifications').doc(notificationId).get();
+  const existingNotif = await db.collection('notificacoes').doc(notificationId).get();
   if (existingNotif.exists) {
     console.log(`Notificação ${notificationId} já processada. Ignorando.`);
     return;
   }
 
   // 2. Buscar dados do usuário alvo
-  const userDoc = await db.collection('users').doc(targetUid).get();
+  const userDoc = await db.collection('usuarios').doc(targetUid).get();
   if (!userDoc.exists) {
     console.error(`Usuário ${targetUid} não encontrado para notificação.`);
     return;
@@ -72,7 +72,7 @@ export async function orchestrateAdminNotification(
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  await db.collection('notifications').doc(notificationId).set(notification);
+  await db.collection('notificacoes').doc(notificationId).set(notification);
 
   // 7. Disparo Assíncrono dos Canais
   const results = await Promise.allSettled(channels.map(async (channel) => {
@@ -102,7 +102,7 @@ async function updateChannelStatus(
   error?: string
 ) {
   const db = admin.firestore();
-  const notifRef = db.collection('notifications').doc(notificationId);
+  const notifRef = db.collection('notificacoes').doc(notificationId);
 
   const doc = await notifRef.get();
   if (!doc.exists) return;

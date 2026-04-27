@@ -1,14 +1,12 @@
 import { UserProfile, UserStatus } from '@/src/types/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatFirebaseDate } from '@/src/lib/utils';
 import { Shield, UserCheck, AlertOctagon, Info } from 'lucide-react';
 
 export function UserAccessCard({ user }: { user: UserProfile }) {
   const formatDate = (date: any) => {
     if (!date) return 'Nunca';
-    const d = date?.toDate?.() || new Date(date);
-    return format(d, "dd/MM/yyyy HH:mm", { locale: ptBR });
+    return formatFirebaseDate(date);
   };
 
   return (

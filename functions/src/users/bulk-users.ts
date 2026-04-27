@@ -1,6 +1,8 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { UserRole, UserStatus } from '../../../src/types/auth';
+import { orchestrateAdminNotification } from '../notifications/notification-orchestrator';
+import { NotificationType } from '../../../src/modules/notifications/types/notification.types';
 
 /**
  * Interface para o resultado de cada item processado no lote
@@ -31,13 +33,13 @@ const MAX_BATCH_SIZE = 50;
 /**
  * Função auxiliar para validar permissão de SUPER_ADMIN ou ORGANIZER
  */
-async function validateAdminPermission(context: functions.https.CallableContext) {
-  if (!context.auth) {
+async function validateAdminPermission(request: functions.https.CallableRequest) {
+  if (!request.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'Usuário não autenticado.');
   }
 
-  const callerUid = context.auth.uid;
-  const callerDoc = await admin.firestore().collection('users').doc(callerUid).get();
+  const callerUid = request.auth.uid;
+  const callerDoc = await admin.firestore().collection('usuarios').doc(callerUid).get();
   const callerData = callerDoc.data();
 
   if (!callerData || (callerData.role !== UserRole.SUPER_ADMIN && callerData.role !== UserRole.ORGANIZER)) {
@@ -60,7 +62,7 @@ async function logAudit(
   reason: string,
   correlationId: string
 ) {
-  const auditRef = admin.firestore().collection('adminAuditLogs').doc();
+  const auditRef = admin.firestore().collection('logs_auditoria').doc();
   batch.set(auditRef, {
     actorUserId: actorId,
     targetUserId: targetId,
@@ -77,9 +79,9 @@ async function logAudit(
 /**
  * APROVAÇÃO EM LOTE
  */
-export const bulkApproveUsers = functions.https.onCall(async (data: { targetUserIds: string[] }, context) => {
-  const { callerUid, callerRole } = await validateAdminPermission(context);
-  const { targetUserIds } = data;
+export const bulkApproveUsers = functions.https.onCall(async (request: functions.https.CallableRequest<{ targetUserIds: string[] }>) => {
+  const { callerUid, callerRole } = await validateAdminPermission(request);
+  const { targetUserIds } = request.data;
 
   if (!Array.isArray(targetUserIds) || targetUserIds.length > MAX_BATCH_SIZE) {
     throw new functions.https.HttpsError('invalid-argument', `Máximo de ${MAX_BATCH_SIZE} usuários por lote.`);
@@ -89,7 +91,7 @@ export const bulkApproveUsers = functions.https.onCall(async (data: { targetUser
   const results: BulkItemResult[] = [];
 
   for (const uid of targetUserIds) {
-    const userRef = admin.firestore().collection('users').doc(uid);
+    const userRef = admin.firestore().collection('usuarios').doc(uid);
     const batch = admin.firestore().batch();
 
     try {
@@ -104,8 +106,14 @@ export const bulkApproveUsers = functions.https.onCall(async (data: { targetUser
         throw new Error('Organizadores não podem aprovar Super Admins');
       }
 
-      const before = { status: userData.status, isApproved: userData.isApproved, role: userData.role };
-      const after = { status: UserStatus.ACTIVE, isApproved: true, role: requestedRole };
+      const before = { status: userData.status, isApproved: userData.isApproved, role: userData.role, accessVersion: userData.accessVersion };
+      const nextVersion = (userData.accessVersion || 0) + 1;
+      const after = {
+        status: UserStatus.ACTIVE,
+        isApproved: true,
+        role: requestedRole,
+        accessVersion: nextVersion
+      };
 
       batch.update(userRef, {
         ...after,
@@ -117,14 +125,26 @@ export const bulkApproveUsers = functions.https.onCall(async (data: { targetUser
 
       await logAudit(batch, callerUid, uid, 'APPROVE_USER', before, after, 'Aprovação em lote', correlationId);
 
-      // Sincronizar Custom Claims
+      // Sincronizar Custom Claims com Access Version
       await admin.auth().setCustomUserClaims(uid, {
         role: after.role,
         status: after.status,
-        isApproved: true
+        isApproved: true,
+        accessVersion: nextVersion
       });
 
       await batch.commit();
+
+      // Disparar Notificação Assíncrona (Fire and forget no contexto da function principal)
+      orchestrateAdminNotification(uid, NotificationType.USER_APPROVED, {
+        actorUserId: callerUid,
+        targetUserId: uid,
+        sourceAction: 'BULK_APPROVE',
+        correlationId,
+        nextRole: after.role,
+        nextStatus: after.status
+      }).catch(err => console.error('Erro ao orquestrar notificação de aprovação:', err));
+
       results.push({ targetUserId: uid, fullName: userData.fullName, success: true, message: 'Aprovado com sucesso', nextRole: after.role });
     } catch (error: any) {
       results.push({ targetUserId: uid, fullName: 'N/A', success: false, message: error.message });
@@ -144,15 +164,15 @@ export const bulkApproveUsers = functions.https.onCall(async (data: { targetUser
 /**
  * REJEIÇÃO EM LOTE
  */
-export const bulkRejectUsers = functions.https.onCall(async (data: { targetUserIds: string[], reason: string }, context) => {
-  const { callerUid } = await validateAdminPermission(context);
-  const { targetUserIds, reason } = data;
+export const bulkRejectUsers = functions.https.onCall(async (request: functions.https.CallableRequest<{ targetUserIds: string[], reason: string }>) => {
+  const { callerUid } = await validateAdminPermission(request);
+  const { targetUserIds, reason } = request.data;
 
   const correlationId = `bulk-reject-${Date.now()}`;
   const results: BulkItemResult[] = [];
 
   for (const uid of targetUserIds) {
-    const userRef = admin.firestore().collection('users').doc(uid);
+    const userRef = admin.firestore().collection('usuarios').doc(uid);
     const batch = admin.firestore().batch();
 
     try {
@@ -160,8 +180,9 @@ export const bulkRejectUsers = functions.https.onCall(async (data: { targetUserI
       if (!userDoc.exists) throw new Error('Usuário não encontrado');
 
       const userData = userDoc.data()!;
-      const before = { status: userData.status };
-      const after = { status: UserStatus.REJECTED, isApproved: false };
+      const before = { status: userData.status, accessVersion: userData.accessVersion };
+      const nextVersion = (userData.accessVersion || 0) + 1;
+      const after = { status: UserStatus.REJECTED, isApproved: false, accessVersion: nextVersion };
 
       batch.update(userRef, {
         ...after,
@@ -173,10 +194,20 @@ export const bulkRejectUsers = functions.https.onCall(async (data: { targetUserI
       await admin.auth().setCustomUserClaims(uid, {
         role: userData.role,
         status: after.status,
-        isApproved: false
+        isApproved: false,
+        accessVersion: nextVersion
       });
 
       await batch.commit();
+
+      orchestrateAdminNotification(uid, NotificationType.USER_REJECTED, {
+        actorUserId: callerUid,
+        targetUserId: uid,
+        sourceAction: 'BULK_REJECT',
+        correlationId,
+        reason
+      }).catch(err => console.error('Erro ao orquestrar notificação de rejeição:', err));
+
       results.push({ targetUserId: uid, fullName: userData.fullName, success: true, message: 'Rejeitado com sucesso' });
     } catch (error: any) {
       results.push({ targetUserId: uid, fullName: 'N/A', success: false, message: error.message });
@@ -196,21 +227,21 @@ export const bulkRejectUsers = functions.https.onCall(async (data: { targetUserI
 /**
  * ALTERAÇÃO DE ACESSO EM LOTE
  */
-export const bulkChangeUserAccess = functions.https.onCall(async (data: {
+export const bulkChangeUserAccess = functions.https.onCall(async (request: functions.https.CallableRequest<{
   targetUserIds: string[],
   nextRole?: UserRole,
   nextStatus?: UserStatus,
   reason: string,
   revokeSessions?: boolean
-}, context) => {
-  const { callerUid, callerRole } = await validateAdminPermission(context);
-  const { targetUserIds, nextRole, nextStatus, reason, revokeSessions } = data;
+}>) => {
+  const { callerUid, callerRole } = await validateAdminPermission(request);
+  const { targetUserIds, nextRole, nextStatus, reason, revokeSessions } = request.data;
 
   const correlationId = `bulk-change-${Date.now()}`;
   const results: BulkItemResult[] = [];
 
   for (const uid of targetUserIds) {
-    const userRef = admin.firestore().collection('users').doc(uid);
+    const userRef = admin.firestore().collection('usuarios').doc(uid);
     const batch = admin.firestore().batch();
 
     try {
@@ -224,8 +255,10 @@ export const bulkChangeUserAccess = functions.https.onCall(async (data: {
         throw new Error('Apenas Super Admins podem promover outros a Super Admin');
       }
 
+      const nextVersion = (userData.accessVersion || 0) + 1;
       const updates: any = {
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        accessVersion: nextVersion,
       };
 
       if (nextRole) {
@@ -245,7 +278,8 @@ export const bulkChangeUserAccess = functions.https.onCall(async (data: {
       await admin.auth().setCustomUserClaims(uid, {
         role: nextRole || userData.role,
         status: nextStatus || userData.status,
-        isApproved: (nextStatus === UserStatus.ACTIVE) ? true : userData.isApproved
+        isApproved: (nextStatus === UserStatus.ACTIVE) ? true : userData.isApproved,
+        accessVersion: nextVersion
       });
 
       if (revokeSessions) {
@@ -253,6 +287,25 @@ export const bulkChangeUserAccess = functions.https.onCall(async (data: {
       }
 
       await batch.commit();
+
+      const notifType = nextStatus === UserStatus.SUSPENDED ? NotificationType.USER_SUSPENDED :
+                        nextStatus === UserStatus.BLOCKED ? NotificationType.USER_BLOCKED :
+                        nextStatus === UserStatus.ACTIVE && userData.status !== UserStatus.ACTIVE ? NotificationType.USER_REACTIVATED :
+                        nextRole && nextRole !== userData.role ? NotificationType.USER_ROLE_CHANGED :
+                        NotificationType.USER_STATUS_CHANGED;
+
+      orchestrateAdminNotification(uid, notifType, {
+        actorUserId: callerUid,
+        targetUserId: uid,
+        sourceAction: 'BULK_CHANGE_ACCESS',
+        correlationId,
+        previousRole: userData.role,
+        nextRole,
+        previousStatus: userData.status,
+        nextStatus,
+        reason
+      }).catch(err => console.error('Erro ao orquestrar notificação de mudança de acesso:', err));
+
       results.push({
         targetUserId: uid,
         fullName: userData.fullName,

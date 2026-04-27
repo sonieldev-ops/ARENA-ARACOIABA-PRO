@@ -13,6 +13,8 @@ export interface LiveMatchState {
   currentSecond: number;
   lastSequenceNumber: number;
   version: number;
+  isActive: boolean;
+  isHomologated: boolean;
   homeTeamId: string;
   awayTeamId: string;
 }

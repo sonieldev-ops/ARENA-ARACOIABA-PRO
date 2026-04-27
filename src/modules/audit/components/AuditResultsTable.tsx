@@ -12,7 +12,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Eye, Link as LinkIcon, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,13 @@ export function AuditResultsTable({
   onViewDetail,
   onFilterCorrelation
 }: AuditResultsTableProps) {
+
+  const parseDate = (date: any) => {
+    if (!date) return new Date();
+    if (typeof date.toDate === 'function') return date.toDate();
+    if (typeof date === 'string') return parseISO(date);
+    return new Date(date);
+  };
 
   const getSeverityColor = (severity: AuditSeverity) => {
     switch (severity) {
@@ -68,7 +75,7 @@ export function AuditResultsTable({
             items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="font-medium text-xs">
-                  {format(item.createdAt.toDate(), "dd/MM/yy HH:mm:ss", { locale: ptBR })}
+                  {format(parseDate(item.createdAt), "dd/MM/yy HH:mm:ss", { locale: ptBR })}
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">

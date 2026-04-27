@@ -8,15 +8,16 @@ import {
   serverTimestamp,
   orderBy
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
-import { UserProfile, UserStatus, UserRole } from '@/types/auth';
+import { db } from '@/src/lib/firebase/client';
+import { removeUndefined } from '@/src/lib/utils';
+import { UserProfile, UserStatus, UserRole } from '@/src/types/auth';
 
 export class AdminUserService {
   /**
    * Lista todos os usuários aguardando aprovação
    */
   async getPendingUsers(): Promise<UserProfile[]> {
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(db, 'usuarios');
     const q = query(
       usersRef,
       where('status', '==', UserStatus.PENDING_APPROVAL),
@@ -34,9 +35,9 @@ export class AdminUserService {
    * Aprova um usuário, definindo sua role final e status como ACTIVE
    */
   async approveUser(uid: string, role: UserRole, adminUid: string): Promise<void> {
-    const userRef = doc(db, 'users', uid);
+    const userRef = doc(db, 'usuarios', uid);
 
-    await updateDoc(userRef, {
+    await updateDoc(userRef, removeUndefined({
       status: UserStatus.ACTIVE,
       role: role,
       isApproved: true,
@@ -45,21 +46,21 @@ export class AdminUserService {
       updatedAt: serverTimestamp(),
       // Incrementa a versão de acesso para invalidar sessões antigas se necessário
       accessVersion: 2
-    });
+    }));
   }
 
   /**
    * Rejeita um usuário
    */
   async rejectUser(uid: string, reason: string, adminUid: string): Promise<void> {
-    const userRef = doc(db, 'users', uid);
+    const userRef = doc(db, 'usuarios', uid);
 
-    await updateDoc(userRef, {
+    await updateDoc(userRef, removeUndefined({
       status: UserStatus.REJECTED,
       blockedReason: reason,
       updatedAt: serverTimestamp(),
       lastApprovalBy: adminUid
-    });
+    }));
   }
 }
 

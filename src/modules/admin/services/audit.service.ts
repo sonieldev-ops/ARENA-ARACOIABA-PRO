@@ -1,5 +1,6 @@
 import { adminDb } from "@/src/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { removeUndefined } from "@/src/lib/utils";
 
 export async function logAudit(data: {
   action: string;
@@ -10,10 +11,10 @@ export async function logAudit(data: {
 }) {
   try {
     if (!adminDb) return;
-    await adminDb.collection("adminAuditLogs").add({
+    await adminDb.collection("logs_auditoria").add(removeUndefined({
       ...data,
       createdAt: FieldValue.serverTimestamp(),
-    });
+    }));
   } catch (error) {
     console.error("Erro ao registrar log de auditoria:", error);
   }

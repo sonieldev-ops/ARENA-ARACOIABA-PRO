@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth/session';
+import { getSessionUser } from '@/lib/auth/session';
 import { bulkApproveUsers } from '@/lib/auth/admin-actions';
 import { UserRole } from '@/src/types/auth';
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await getSessionUser();
     if (!session || (session.role !== UserRole.SUPER_ADMIN && session.role !== UserRole.ORGANIZER)) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
     }

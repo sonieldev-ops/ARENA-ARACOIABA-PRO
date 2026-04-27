@@ -27,7 +27,7 @@ const adminDb = getFirestore(adminApp);
 async function fixField() {
   console.log("🔧 Corrigindo campo competitionId -> championshipId nas partidas...");
 
-  const matchesSnapshot = await adminDb.collection("matches").get();
+  const matchesSnapshot = await adminDb.collection("partidas").get();
   const batch = adminDb.batch();
 
   matchesSnapshot.docs.forEach(doc => {
@@ -42,7 +42,7 @@ async function fixField() {
   });
 
   // Também garantir que o campeonato tenha status ACTIVE
-  batch.update(adminDb.collection("championships").doc("champ-2024"), {
+  batch.update(adminDb.collection("campeonatos").doc("champ-2024"), {
     status: "ACTIVE"
   });
 

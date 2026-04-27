@@ -1,5 +1,6 @@
 import { adminDb } from "@/src/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { removeUndefined } from "@/src/lib/utils";
 
 export class RankingService {
   /**
@@ -9,14 +10,14 @@ export class RankingService {
     console.log(`[RankingService] Recalculando campeonato: ${championshipId}`);
 
     const matchesSnap = await adminDb
-      .collection("matches")
+      .collection("partidas")
       .where("competitionId", "==", championshipId)
       .where("status", "==", "FINISHED")
       .get();
 
     const table: Record<string, any> = {};
 
-    matchesSnap.forEach((doc) => {
+    matchesSnap.forEach((doc: any) => {
       const m = doc.data();
       const { teamAId, teamBId, scoreA, scoreB, teamAName, teamBName } = m;
 
@@ -64,15 +65,15 @@ export class RankingService {
 
     // Salvar em Batch
     const batch = adminDb.batch();
-    const rankingRef = adminDb.collection("rankings").doc(championshipId).collection("teams");
+    const rankingRef = adminDb.collection("classificacoes").doc(championshipId).collection("times");
 
     sorted.forEach((team: any, index: number) => {
       const docRef = rankingRef.doc(team.teamId);
-      batch.set(docRef, {
+      batch.set(docRef, removeUndefined({
         ...team,
         position: index + 1,
         updatedAt: FieldValue.serverTimestamp(),
-      });
+      }));
     });
 
     await batch.commit();

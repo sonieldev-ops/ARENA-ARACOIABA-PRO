@@ -73,6 +73,16 @@ export function useUsersAdmin() {
     }
   };
 
+  const handleBulkApprove = async (uids: string[]) => {
+    try {
+      const result = await UsersAdminService.bulkApproveUsers(uids);
+      toast.success(`Lote processado: ${result.approved} aprovados, ${result.failed} falhas.`);
+      await fetchUsers();
+    } catch (err: any) {
+      toast.error('Erro no processamento em lote: ' + err.message);
+    }
+  };
+
   const handleChangeAccess = async (payload: any) => {
     try {
       await UsersAdminService.changeUserAccess(payload);

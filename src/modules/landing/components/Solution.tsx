@@ -1,6 +1,6 @@
 "use client";
 
-import { trackEvent, DATA_TEST_IDS } from "@/lib/tracking";
+import { trackEvent, DATA_TEST_IDS } from "@/src/lib/tracking";
 import { CheckCircle2, Zap, Smartphone, LayoutDashboard, Bell, BarChart3 } from "lucide-react";
 
 const FEATURES = [

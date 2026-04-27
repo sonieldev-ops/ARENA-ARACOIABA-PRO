@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { auth } from '@/lib/firebase/client';
 import { onIdTokenChanged } from 'firebase/auth';
@@ -13,7 +13,18 @@ export function useSessionRevalidator() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const isRefreshing = useRef(false);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
   const refreshSession = useCallback(async (idToken: string) => {
+    if (isRefreshing.current || !mounted.current) return;
+    isRefreshing.current = true;
+
     try {
       const res = await fetch('/api/auth/refresh-session', {
         method: 'POST',
@@ -22,15 +33,22 @@ export function useSessionRevalidator() {
       });
 
       if (res.ok) {
-        // Se a sessão foi atualizada com sucesso, refresca a rota atual
-        // para garantir que os Server Components recebam as novas claims
-        router.refresh();
+        // Envolve em um setTimeout para garantir que o router já está inicializado
+        setTimeout(() => {
+          if (mounted.current) router.refresh();
+        }, 100);
       } else if (res.status === 401) {
-        // Se falhou por não estar autorizado, manda para o login
-        router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+        setTimeout(() => {
+          if (mounted.current) router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
+        }, 100);
       }
     } catch (error) {
       console.error('Falha ao sincronizar sessão:', error);
+    } finally {
+      // Pequeno delay para evitar loops infinitos de refresh
+      setTimeout(() => {
+        isRefreshing.current = false;
+      }, 2000);
     }
   }, [router, pathname]);
 

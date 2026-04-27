@@ -32,6 +32,8 @@ export class PrismaLiveMatchRepository implements ILiveMatchRepository {
       currentSecond: record.currentSecond,
       lastSequenceNumber: record.lastSequenceNumber,
       version: record.version,
+      isActive: record.isActive,
+      isHomologated: record.isHomologated,
       homeTeamId: record.match.homeTeamId,
       awayTeamId: record.match.awayTeamId,
     };
@@ -51,6 +53,8 @@ export class PrismaLiveMatchRepository implements ILiveMatchRepository {
         currentSecond: state.currentSecond,
         lastSequenceNumber: state.lastSequenceNumber,
         version: state.version,
+        isActive: state.isActive,
+        isHomologated: state.isHomologated,
       },
       create: {
         matchId: state.matchId,
@@ -64,6 +68,8 @@ export class PrismaLiveMatchRepository implements ILiveMatchRepository {
         currentSecond: state.currentSecond,
         lastSequenceNumber: state.lastSequenceNumber,
         version: state.version,
+        isActive: state.isActive,
+        isHomologated: state.isHomologated,
       },
     });
   }
@@ -92,6 +98,8 @@ export class PrismaLiveMatchRepository implements ILiveMatchRepository {
       currentSecond: 0,
       lastSequenceNumber: 0,
       version: 1,
+      isActive: false,
+      isHomologated: false,
       homeTeamId: match.homeTeamId,
       awayTeamId: match.awayTeamId,
     };

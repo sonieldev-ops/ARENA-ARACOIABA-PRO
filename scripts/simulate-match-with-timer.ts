@@ -32,7 +32,7 @@ async function simulate() {
   const startedAt = new Date();
   startedAt.setMinutes(startedAt.getMinutes() - 15);
 
-  const matchRef = adminDb.collection("matches").doc(matchId);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
   await matchRef.set({
     id: matchId,
     teamAId: "team-01",

@@ -1,0 +1,70 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export async function middleware(request: NextRequest) {
+  const sessionValue = request.cookies.get('__session')?.value;
+  const { pathname } = request.nextUrl;
+
+  // 1. Definir rotas públicas e privadas
+  const isPublicRoute =
+    pathname === '/' ||
+    pathname.startsWith('/matches') ||
+    pathname.startsWith('/ranking') ||
+    pathname.startsWith('/scorers') ||
+    pathname.startsWith('/teams') ||
+    pathname.startsWith('/api/public');
+
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
+  const isProtectedRoute =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/athlete') ||
+    pathname.startsWith('/team/dashboard');
+
+  const isPendingPage = pathname === '/pending-approval';
+  const isApiAuth = pathname.startsWith('/api/auth');
+
+  // Permitir acesso a APIs de autenticação sem loop
+  if (isApiAuth) return NextResponse.next();
+
+  // 2. Se não houver sessão e tentar acessar rota protegida, vai para login
+  if (!sessionValue && isProtectedRoute) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('from', pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Verificação profunda se houver sessão
+  if (sessionValue) {
+    try {
+      // Como middleware não pode usar firebase-admin (dependências de node),
+      // fazemos o decode do JWT se possível ou usamos uma estratégia de "cookie hints"
+      // Para o desafio ARENA PRO, usaremos a estratégia de consultar a API de sessão interna
+      // ou ler metadados injetados no próprio cookie se estiverem acessíveis.
+
+      // Implementação simplificada: Redirecionar baseado em cookies de estado se existirem
+      const userStatus = request.cookies.get('user-status')?.value;
+
+      if (userStatus === 'PENDING_APPROVAL' && !isPendingPage && !isAuthPage) {
+        return NextResponse.redirect(new URL('/pending-approval', request.url));
+      }
+
+      if (sessionValue && isAuthPage) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+    } catch (e) {
+      return NextResponse.next();
+    }
+  }
+
+  return NextResponse.next();
+}
+
+// Configuração do matcher para otimização
+export const config = {
+  matcher: [
+    '/admin/:path*',
+    '/login',
+    '/register',
+    '/pending-approval',
+  ],
+};

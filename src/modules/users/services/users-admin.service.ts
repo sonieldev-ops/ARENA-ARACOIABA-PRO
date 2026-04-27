@@ -75,6 +75,19 @@ export class UsersAdminService {
     return result.data;
   }
 
+  static async bulkApproveUsers(targetUserIds: string[]) {
+    const res = await fetch('/api/admin/users/bulk-approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetUserIds }),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || 'Falha na aprovação em lote');
+    }
+    return res.json();
+  }
+
   static async rejectUser(data: RejectUserPayload) {
     const result = await rejectUserFn(data);
     return result.data;

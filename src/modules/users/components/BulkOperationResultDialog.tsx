@@ -85,7 +85,7 @@ export function BulkOperationResultDialog({
                      {item.nextRole && (
                         <Badge variant="outline" className="text-[10px] h-5">{item.nextRole}</Badge>
                      )}
-                     <Link href={`/admin/users/${item.targetUserId}`} target="_blank">
+                     <Link href={`/admin/usuarios/${item.targetUserId}`} target="_blank">
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <ExternalLink className="h-4 w-4" />
                         </Button>

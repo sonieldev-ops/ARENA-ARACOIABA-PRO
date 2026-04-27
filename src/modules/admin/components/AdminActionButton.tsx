@@ -1,11 +1,13 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, ComponentProps } from 'react';
 import { LucideIcon } from 'lucide-react';
-import { Button, ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/src/lib/utils';
+import { VariantProps } from 'class-variance-authority';
+import { buttonVariants } from '@/components/ui/button';
 
-interface AdminActionButtonProps extends ButtonProps {
+interface AdminActionButtonProps extends ComponentProps<typeof Button> {
   icon?: LucideIcon;
   children: ReactNode;
 }

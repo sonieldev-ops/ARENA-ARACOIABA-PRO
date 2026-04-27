@@ -27,7 +27,7 @@ export function RefereeForm({ onClose, onSubmit }: RefereeFormProps) {
     pix: '',
     matchFee: '',
     notes: '',
-    status: 'ACTIVE' as const
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
   });
 
   const handleSubmit = (e: React.FormEvent) => {

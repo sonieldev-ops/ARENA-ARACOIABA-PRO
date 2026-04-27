@@ -18,11 +18,24 @@ export function RecentAuditTimeline({ logs, loading }: RecentAuditTimelineProps)
     return <div className="h-64 bg-slate-50 animate-pulse rounded-xl border"></div>;
   }
 
+  const actionTranslations: Record<string, string> = {
+    'START_MATCH': 'Iniciou a partida',
+    'FINISH_MATCH': 'Encerrou a partida',
+    'REGISTER_GOAL': 'Registrou um gol',
+    'REGISTER_YELLOW_CARD': 'Aplicou cartão amarelo',
+    'REGISTER_RED_CARD': 'Aplicou cartão vermelho',
+    'REGISTER_SUBSTITUTION': 'Realizou substituição',
+    'USER_APPROVE': 'Aprovou usuário',
+    'USER_REJECT': 'Rejeitou usuário',
+    'USER_BLOCK': 'Bloqueou usuário',
+    'ROLE_CHANGE': 'Alterou permissões',
+  };
+
   const getActionColor = (action: string) => {
-    if (action.includes('APPROVE')) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (action.includes('REJECT')) return 'bg-red-50 text-red-700 border-red-200';
+    if (action.includes('APPROVE') || action.includes('START')) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (action.includes('REJECT') || action.includes('RED_CARD')) return 'bg-red-50 text-red-700 border-red-200';
     if (action.includes('BLOCK')) return 'bg-slate-900 text-white';
-    if (action.includes('CHANGE')) return 'bg-blue-50 text-blue-700 border-blue-200';
+    if (action.includes('CHANGE') || action.includes('GOAL')) return 'bg-blue-50 text-blue-700 border-blue-200';
     return 'bg-slate-50 text-slate-700 border-slate-200';
   };
 
@@ -33,7 +46,7 @@ export function RecentAuditTimeline({ logs, loading }: RecentAuditTimelineProps)
           <History className="w-4 h-4 text-blue-500" />
           Atividades Recentes de Auditoria
         </h3>
-        <Link href="/admin/audit">
+        <Link href="/admin/auditoria">
            <Button variant="ghost" size="sm" className="text-xs h-7">Ver Tudo</Button>
         </Link>
       </div>
@@ -57,8 +70,8 @@ export function RecentAuditTimeline({ logs, loading }: RecentAuditTimelineProps)
 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Badge variant="outline" className={getActionColor(log.action)}>
-                      {log.action}
+                    <Badge variant="outline" className={getActionColor(String(log.action))}>
+                      {actionTranslations[log.action] || String(log.action).replace(/_/g, ' ')}
                     </Badge>
                     <span className="text-[10px] text-slate-400">
                       {log.createdAt?.seconds ? formatDistanceToNow(new Date(log.createdAt.seconds * 1000), { addSuffix: true, locale: ptBR }) : 'Agora'}
@@ -66,17 +79,19 @@ export function RecentAuditTimeline({ logs, loading }: RecentAuditTimelineProps)
                   </div>
 
                   <div className="text-xs text-slate-700 leading-relaxed">
-                    <strong>{log.actorName}</strong> {log.action.toLowerCase().replace('_', ' ')} para <strong>{log.targetName}</strong>
+                    <strong>{log.actorName}</strong> {actionTranslations[log.action]?.toLowerCase() || String(log.action).toLowerCase().replace(/_/g, ' ')} em <strong>{log.targetName}</strong>
                   </div>
 
                   {log.reason && (
                     <div className="text-[11px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 italic">
-                      "{log.reason}"
+                      {typeof log.reason === 'object' 
+                        ? (log.reason.playerName ? `Atleta: ${log.reason.playerName}` : JSON.stringify(log.reason)) 
+                        : `"${log.reason}"`}
                     </div>
                   )}
 
                   <div className="flex items-center gap-3 mt-2">
-                    <Link href={`/admin/users/${log.targetUserId}`} className="flex items-center gap-1 text-[10px] text-blue-600 hover:underline">
+                    <Link href={`/admin/usuarios/${log.targetUserId}`} className="flex items-center gap-1 text-[10px] text-blue-600 hover:underline">
                        <User className="w-3 h-3" /> Perfil do Alvo
                     </Link>
                     <span className="text-[10px] text-slate-300">|</span>

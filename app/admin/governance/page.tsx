@@ -10,37 +10,39 @@ import { Button } from '@/components/ui/button';
 import { RefreshCcw, ShieldCheck, Download, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
+
 export default function GovernancePage() {
   const { data, loading, refresh } = useGovernanceDashboard();
 
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 pb-20">
-      {/* Header Executivo */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+      <AdminPageHeader
+        title="Governança e Auditoria"
+        subtitle="Monitoramento de conformidade, controle de acesso e trilha de auditoria administrativa."
+        action={
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Governança e Auditoria</h1>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Painel Executivo</Badge>
+            <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="gap-2 border-slate-800 text-slate-400">
+              <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2 border-slate-800 text-slate-400">
+              <Download className="w-4 h-4" />
+              Exportar
+            </Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              Revisão de Acessos
+            </Button>
           </div>
-          <p className="text-slate-500 mt-1">
-            Monitoramento de conformidade, controle de acesso e trilha de auditoria administrativa.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="gap-2">
-            <RefreshCcw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download className="w-4 h-4" />
-            Exportar Relatório
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <ShieldCheck className="w-4 h-4" />
-            Revisão de Acessos
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Grid de KPIs principais */}
       <GovernanceKpiGrid kpis={data?.kpis || []} loading={loading} />
@@ -78,13 +80,18 @@ export default function GovernancePage() {
       </div>
 
       {/* Footer de Informação */}
-      <div className="pt-8 border-t flex items-center justify-between text-[10px] text-slate-400 uppercase tracking-widest">
-         <span>Arena Aracoiaba Pro - Sistema de Governança</span>
-         <div className="flex items-center gap-4">
-            <span>Última atualização: {new Date().toLocaleTimeString()}</span>
-            <span>Versão da Auditoria: v2.4.0</span>
-         </div>
-      </div>
+      <footer className="mt-20 pt-10 border-t border-slate-800 w-full block">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-[10px] text-slate-500 uppercase tracking-widest px-2">
+          <span className="font-medium">Arena Aracoiaba Pro — Sistema de Governança e Auditoria</span>
+          <div className="flex items-center gap-8">
+             <span className="flex items-center gap-2">
+               <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+               Última atualização: {mounted ? new Date().toLocaleTimeString() : '--:--:--'}
+             </span>
+             <span className="text-slate-600">Versão da Auditoria: v2.4.0</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

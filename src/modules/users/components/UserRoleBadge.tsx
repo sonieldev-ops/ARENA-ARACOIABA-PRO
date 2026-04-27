@@ -1,22 +1,22 @@
 import { UserRole } from '@/src/types/auth';
-import { Badge } from '@/components/ui/badge';
 
-const roleConfig: Record<UserRole, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info" }> = {
-  [UserRole.SUPER_ADMIN]: { label: 'Super Admin', variant: 'destructive' },
-  [UserRole.ORGANIZER]: { label: 'Organizador', variant: 'warning' },
-  [UserRole.REFEREE]: { label: 'Árbitro', variant: 'info' },
-  [UserRole.STAFF]: { label: 'Staff', variant: 'secondary' },
-  [UserRole.TEAM_MANAGER]: { label: 'Gestor de Time', variant: 'success' },
-  [UserRole.ATHLETE]: { label: 'Atleta', variant: 'outline' },
-  [UserRole.PUBLIC_USER]: { label: 'Público', variant: 'default' },
+const roleConfig: Record<UserRole, { label: string; className: string }> = {
+  [UserRole.SUPER_ADMIN]: { label: 'SUPER ADMIN', className: 'bg-rose-600 text-white border-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.3)]' },
+  [UserRole.ADMIN]: { label: 'ADMINISTRADOR', className: 'bg-blue-600 text-white border-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.3)]' },
+  [UserRole.ORGANIZER]: { label: 'ORGANIZADOR', className: 'bg-zinc-800 text-zinc-300 border-zinc-700' },
+  [UserRole.REFEREE]: { label: 'ÁRBITRO', className: 'bg-zinc-800 text-zinc-300 border-zinc-700' },
+  [UserRole.STAFF]: { label: 'STAFF', className: 'bg-zinc-800 text-zinc-400 border-zinc-800' },
+  [UserRole.TEAM_MANAGER]: { label: 'GESTOR TIME', className: 'bg-emerald-600 text-white border-emerald-500' },
+  [UserRole.ATHLETE]: { label: 'ATLETA', className: 'bg-zinc-900 text-zinc-500 border-zinc-800' },
+  [UserRole.PUBLIC_USER]: { label: 'TORCEDOR', className: 'bg-zinc-900 text-zinc-600 border-zinc-900' },
 };
 
 export function UserRoleBadge({ role }: { role: UserRole }) {
-  const config = roleConfig[role] || { label: role, variant: 'default' };
+  const config = roleConfig[role] || { label: role, className: 'bg-zinc-900 text-zinc-500' };
 
   return (
-    <Badge variant={config.variant as any} className="whitespace-nowrap">
+    <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider border whitespace-nowrap ${config.className}`}>
       {config.label}
-    </Badge>
+    </span>
   );
 }

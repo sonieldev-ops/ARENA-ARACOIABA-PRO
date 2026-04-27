@@ -14,7 +14,7 @@ export async function createInitialProfile(input: {
 
   const access = resolveInitialAccess(requestedRole);
 
-  const profileRef = adminDb.collection('users').doc(uid);
+  const profileRef = adminDb.collection('usuarios').doc(uid);
 
   const existing = await profileRef.get();
   if (existing.exists) {
@@ -32,6 +32,7 @@ export async function createInitialProfile(input: {
     status: access.status,
     isApproved: access.isApproved,
     approvalRequired: access.approvalRequired,
+    requestedRole: requestedRole ?? UserRole.PUBLIC_USER,
     photoUrl: null,
     teamId: null,
     createdAt: now,

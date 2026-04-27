@@ -51,7 +51,7 @@ export interface RecentAuditItem {
   targetUserId: string;
   targetName: string;
   action: string;
-  reason?: string;
+  reason?: any;
   createdAt: any;
   correlationId: string;
 }

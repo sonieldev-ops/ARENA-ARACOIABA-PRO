@@ -2,6 +2,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin } from "lucide-react";
 
+import { cn } from "@/src/lib/utils";
+
 interface MatchCardAdminProps {
   homeTeam: string;
   awayTeam: string;
@@ -18,39 +20,41 @@ export function MatchCardAdmin({ homeTeam, awayTeam, time, location, status }: M
   };
 
   return (
-    <Card className="bg-zinc-900/40 border-zinc-800 hover:border-zinc-700 transition-all">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <Badge variant="outline" className={statusConfig[status].className}>
+    <Card className="bg-zinc-900/40 border-zinc-800 hover:border-zinc-700 transition-all flex flex-col h-full">
+      <CardContent className="p-5 flex flex-col h-full">
+        <div className="flex items-center justify-between mb-6">
+          <Badge variant="outline" className={cn("px-2 py-0.5 text-[10px] font-black tracking-widest", statusConfig[status].className)}>
             {statusConfig[status].label}
           </Badge>
-          <div className="flex items-center gap-2 text-zinc-500 text-sm">
+          <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-bold">
             <Clock className="w-3 h-3" />
             {time}
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 text-center">
-            <div className="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-2 flex items-center justify-center text-zinc-600 font-bold">
+        <div className="flex items-center justify-between gap-2 flex-1">
+          <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+            <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 font-black text-sm shadow-inner transition-colors">
               {homeTeam.substring(0, 2).toUpperCase()}
             </div>
-            <p className="font-semibold text-white text-sm truncate">{homeTeam}</p>
+            <p className="font-bold text-white text-xs text-center truncate w-full">{homeTeam}</p>
           </div>
 
-          <div className="text-zinc-700 font-black italic text-xl">VS</div>
+          <div className="flex flex-col items-center gap-1 px-2">
+            <span className="text-zinc-800 font-black italic text-lg tracking-tighter">VS</span>
+          </div>
 
-          <div className="flex-1 text-center">
-            <div className="w-12 h-12 bg-zinc-800 rounded-full mx-auto mb-2 flex items-center justify-center text-zinc-600 font-bold">
+          <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+            <div className="w-12 h-12 bg-zinc-950 border border-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 font-black text-sm shadow-inner transition-colors">
               {awayTeam.substring(0, 2).toUpperCase()}
             </div>
-            <p className="font-semibold text-white text-sm truncate">{awayTeam}</p>
+            <p className="font-bold text-white text-xs text-center truncate w-full">{awayTeam}</p>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-zinc-800/50 flex items-center gap-2 text-zinc-500 text-xs">
-          <MapPin className="w-3 h-3" />
-          {location}
+        <div className="mt-6 pt-4 border-t border-zinc-800/50 flex items-center gap-2 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">
+          <MapPin className="w-3 h-3 text-blue-500" />
+          <span className="truncate">{location}</span>
         </div>
       </CardContent>
     </Card>

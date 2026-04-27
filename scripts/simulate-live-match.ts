@@ -29,7 +29,7 @@ async function simulate() {
   console.log("🎮 Iniciando simulação de partida real...");
 
   // 1. Criar a Partida
-  const matchRef = adminDb.collection("matches").doc(matchId);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
   await matchRef.set({
     id: matchId,
     teamAId: "team-01", // Leões do Norte

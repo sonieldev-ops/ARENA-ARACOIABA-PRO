@@ -1,31 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
-import { SESSION_COOKIE_NAME, verifySessionCookieValue } from '@/lib/auth/session';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
-export async function POST(req: NextRequest) {
-  const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME)?.value;
+export const dynamic = 'force-dynamic';
 
-  const res = NextResponse.json({ ok: true }, { status: 200 });
+export async function POST() {
+  const cookieStore = await cookies();
 
-  res.cookies.set({
-    name: SESSION_COOKIE_NAME,
-    value: '',
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+  // Criar a resposta de sucesso
+  const response = NextResponse.json(
+    { success: true, message: 'Logout realizado com sucesso' },
+    { status: 200 }
+  );
+
+  // Limpar os cookies com flags de segurança
+  const cookieOptions = {
     path: '/',
+    maxAge: 0,
     expires: new Date(0),
-  });
+    httpOnly: false, // user-status e user-role não eram httpOnly
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+  };
 
-  if (!sessionCookie) return res;
+  response.cookies.set('__session', '', { ...cookieOptions, httpOnly: true });
+  response.cookies.set('user-status', '', cookieOptions);
+  response.cookies.set('user-role', '', cookieOptions);
 
-  try {
-    const decoded = await verifySessionCookieValue(sessionCookie);
-    await adminAuth.revokeRefreshTokens(decoded.sub);
-  } catch (error) {
-    // Mantém logout idempotente
-    console.error('Logout error:', error);
-  }
+  return response;
+}
 
-  return res;
+// Suporte para GET caso queira fazer logout via link (opcional, mas bom para UX)
+export async function GET() {
+  return POST();
 }

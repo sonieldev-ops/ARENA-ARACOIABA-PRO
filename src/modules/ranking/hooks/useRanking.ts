@@ -13,7 +13,7 @@ export function useRanking(championshipId: string) {
 
     // Acessa a subcoleção de times dentro do documento do ranking do campeonato
     const q = query(
-      collection(db, "rankings", championshipId, "teams"),
+      collection(db, "classificacoes", championshipId, "teams"),
       orderBy("position", "asc")
     );
 

@@ -8,6 +8,7 @@ import {
   updateDoc
 } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase/client';
+import { removeUndefined } from '@/src/lib/utils';
 import { InviteDetails } from '../types/invite.types';
 
 export class InviteService {
@@ -35,10 +36,10 @@ export class InviteService {
 
   async rejectInvite(inviteId: string): Promise<void> {
     const inviteRef = doc(db, 'teamInvites', inviteId);
-    await updateDoc(inviteRef, {
+    await updateDoc(inviteRef, removeUndefined({
       status: 'REJECTED',
       rejectedAt: new Date()
-    });
+    }));
   }
 
   async acceptInvite(inviteId: string, userId: string): Promise<void> {

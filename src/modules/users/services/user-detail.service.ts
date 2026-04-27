@@ -8,13 +8,14 @@ import {
   getDocs,
   limit
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/client';
+import { db } from '@/src/lib/firebase/client';
 import { UserProfile } from '@/src/types/auth';
 import { AdminAuditLog } from '../types/user-detail.types';
+import { QueryConstraint } from 'firebase/firestore';
 
 export class UserDetailService {
   static async getUserById(uid: string): Promise<UserProfile | null> {
-    const docRef = doc(db, 'users', uid);
+    const docRef = doc(db, 'usuarios', uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
@@ -24,8 +25,8 @@ export class UserDetailService {
   }
 
   static async getUserAuditLogs(uid: string, filters?: any): Promise<AdminAuditLog[]> {
-    const logsRef = collection(db, 'adminAuditLogs');
-    const constraints = [
+    const logsRef = collection(db, 'logs_auditoria');
+    const constraints: QueryConstraint[] = [
       where('targetUserId', '==', uid),
       orderBy('createdAt', 'desc')
     ];

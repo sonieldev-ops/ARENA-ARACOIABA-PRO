@@ -1,6 +1,8 @@
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { adminAuth, adminDb } from '../firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import { UserRole, UserStatus, UserProfile } from '@/src/types/auth';
+import { UserRole, UserStatus, UserProfile } from '../../src/types/auth';
+
+import { Transaction } from 'firebase-admin/firestore';
 
 /**
  * Registra um log de auditoria administrativa.
@@ -13,7 +15,7 @@ export async function recordAdminAuditLog(input: {
   after: any;
   reason?: string | null;
 }) {
-  await adminDb.collection('adminAuditLogs').add({
+  await adminDb.collection('logs_auditoria').add({
     ...input,
     reason: input.reason ?? null,
     source: 'ADMIN_PANEL',
@@ -30,6 +32,7 @@ export async function syncClaimsFromProfile(uid: string, profile: Partial<UserPr
     status: profile.status,
     isApproved: profile.isApproved,
     approvalRequired: profile.approvalRequired,
+    accessVersion: profile.accessVersion || 0,
   });
 }
 
@@ -37,14 +40,15 @@ export async function syncClaimsFromProfile(uid: string, profile: Partial<UserPr
  * Aprova um usuário pendente.
  */
 export async function approveUser(actorId: string, targetUserId: string) {
-  const userRef = adminDb.collection('users').doc(targetUserId);
+  const userRef = adminDb.collection('usuarios').doc(targetUserId);
 
-  return await adminDb.runTransaction(async (transaction) => {
-    const snap = await transaction.get(userRef);
+  return await adminDb.runTransaction(async (transaction: Transaction) => {
+    const snap = (await transaction.get(userRef)) as any;
     if (!snap.exists) throw new Error('Usuário não encontrado');
 
     const before = snap.data() as UserProfile;
-    const requestedRole = (before as any).metadata?.requestedRole || UserRole.PUBLIC_USER;
+    const requestedRole = before.requestedRole || UserRole.PUBLIC_USER;
+    const nextVersion = (before.accessVersion || 0) + 1;
 
     const now = FieldValue.serverTimestamp();
     const update = {
@@ -52,6 +56,7 @@ export async function approveUser(actorId: string, targetUserId: string) {
       status: UserStatus.ACTIVE,
       isApproved: true,
       approvalRequired: false,
+      accessVersion: nextVersion,
       lastApprovalAt: now,
       lastApprovalBy: actorId,
       lastRoleChangeAt: now,
@@ -76,22 +81,51 @@ export async function approveUser(actorId: string, targetUserId: string) {
 }
 
 /**
+ * Aprova múltiplos usuários em lote.
+ */
+export async function bulkApproveUsers(actorId: string, targetUserIds: string[]) {
+  const results = [];
+  const errors = [];
+
+  // Executamos em série ou pequenos chunks para evitar limites de concorrência/transação do Firestore se necessário
+  // Para volumes administrativos normais (ex: 20-50), Promise.all é aceitável.
+  const promises = targetUserIds.map(async (uid) => {
+    try {
+      const result = await approveUser(actorId, uid);
+      return { uid, success: true, role: result.role };
+    } catch (error: any) {
+      return { uid, success: false, error: error.message };
+    }
+  });
+
+  const resolved = await Promise.all(promises);
+  return {
+    total: targetUserIds.length,
+    approved: resolved.filter(r => r.success).length,
+    failed: resolved.filter(r => !r.success).length,
+    details: resolved
+  };
+}
+
+/**
  * Rejeita um usuário pendente.
  */
 export async function rejectUser(actorId: string, targetUserId: string, reason: string) {
-  const userRef = adminDb.collection('users').doc(targetUserId);
+  const userRef = adminDb.collection('usuarios').doc(targetUserId);
 
-  return await adminDb.runTransaction(async (transaction) => {
-    const snap = await transaction.get(userRef);
+  return await adminDb.runTransaction(async (transaction: Transaction) => {
+    const snap = (await transaction.get(userRef)) as any;
     if (!snap.exists) throw new Error('Usuário não encontrado');
 
     const before = snap.data() as UserProfile;
     const now = FieldValue.serverTimestamp();
+    const nextVersion = (before.accessVersion || 0) + 1;
 
     const update = {
       status: UserStatus.REJECTED,
       isApproved: false,
       approvalRequired: false,
+      accessVersion: nextVersion,
       updatedAt: now,
       blockedReason: reason,
     };
@@ -124,15 +158,19 @@ export async function changeUserAccess(input: {
   reason?: string;
 }) {
   const { actorId, targetUserId, nextRole, nextStatus, reason } = input;
-  const userRef = adminDb.collection('users').doc(targetUserId);
+  const userRef = adminDb.collection('usuarios').doc(targetUserId);
 
-  return await adminDb.runTransaction(async (transaction) => {
-    const snap = await transaction.get(userRef);
+  return await adminDb.runTransaction(async (transaction: Transaction) => {
+    const snap = (await transaction.get(userRef)) as any;
     if (!snap.exists) throw new Error('Usuário não encontrado');
 
     const before = snap.data() as UserProfile;
     const now = FieldValue.serverTimestamp();
-    const update: any = { updatedAt: now };
+    const nextVersion = (before.accessVersion || 0) + 1;
+    const update: any = {
+      updatedAt: now,
+      accessVersion: nextVersion
+    };
 
     if (nextRole && nextRole !== before.role) {
       update.role = nextRole;

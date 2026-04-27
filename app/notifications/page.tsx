@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useNotifications } from '@/modules/notifications/hooks/useNotifications';
-import { NotificationItemCard } from '@/modules/notifications/components/NotificationItemCard';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useNotifications } from '@/src/modules/notifications/hooks/useNotifications';
+import { NotificationItemCard } from '@/src/modules/notifications/components/NotificationItemCard';
 import { CheckCheck, Filter, BellOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function NotificationsPage() {
-  const { user } = useAuth();
+  const { data } = useCurrentUser();
+  const user = data?.user;
   const router = useRouter();
   const {
     notifications,
@@ -19,7 +20,7 @@ export default function NotificationsPage() {
     markAllAsRead,
     filters,
     setFilters
-  } = useNotifications(user?.uid);
+  } = useNotifications(user?.id);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 

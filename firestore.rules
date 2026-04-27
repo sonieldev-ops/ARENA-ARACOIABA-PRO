@@ -1,42 +1,117 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // --- FUNÇÕES DE SEGURANÇA ---
+
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isSuperAdmin() {
-      return isSignedIn() && request.auth.token.role == 'SUPER_ADMIN';
+    function getUserData() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
     }
 
-    function isOrganizer() {
-      return isSignedIn() && request.auth.token.role == 'ORGANIZER';
+    function hasRole(role) {
+      return isSignedIn() && (
+        request.auth.token.role == role ||
+        getUserData().role == role
+      );
     }
 
-    function canAdminUsers() {
-      return isSuperAdmin() || isOrganizer();
+    function isStaff() {
+       return isSignedIn() && (
+         hasRole('SUPER_ADMIN') ||
+         hasRole('ADMIN') ||
+         hasRole('ORGANIZER') ||
+         hasRole('REFEREE')
+       );
     }
 
-    match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || canAdminUsers());
-
-      // Permite criar o perfil inicial (geralmente feito no signup via server, mas bom ter aqui)
-      allow create: if isSignedIn() && request.auth.uid == uid;
-
-      // Bloqueia alteração direta de campos de governança pelo cliente
-      allow update: if isSignedIn()
-        && request.auth.uid == uid
-        && !('role' in request.resource.data.diff(resource.data).changedKeys())
-        && !('status' in request.resource.data.diff(resource.data).changedKeys())
-        && !('isApproved' in request.resource.data.diff(resource.data).changedKeys())
-        && !('approvalRequired' in request.resource.data.diff(resource.data).changedKeys());
-
-      allow delete: if isSuperAdmin();
+    function isAdmin() {
+       return isSignedIn() && (
+         hasRole('SUPER_ADMIN') ||
+         hasRole('ADMIN')
+       );
     }
 
-    match /adminAuditLogs/{logId} {
-      allow read: if canAdminUsers();
-      allow write: if false; // Apenas via Admin SDK (Server)
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // --- REGRAS POR COLEÇÃO ---
+
+    // USUARIOS: Somente Admin ou o próprio dono lê/escreve campos básicos.
+    match /usuarios/{userId} {
+      allow read: if isOwner(userId) || isStaff();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'status']);
+
+      // Sub-coleção de Favoritos (Torcedor)
+      match /favoritos/{teamId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Sub-coleção de Notificações (Usuário)
+      match /notificacoes/{notificationId} {
+        allow read, update: if isOwner(userId);
+        allow create, delete: if false; // Criado apenas via Backend
+      }
+    }
+
+    // CAMPEONATOS, TIMES, ATLETAS, PARTIDAS
+    // Leitura pública
+    match /campeonatos/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || (hasRole('ORGANIZER') && (resource == null || resource.data.ownerId == request.auth.uid));
+    }
+
+    match /times/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || hasRole('ORGANIZER') || (hasRole('TEAM_MANAGER') && resource.data.ownerId == request.auth.uid);
+    }
+
+    match /atletas/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || hasRole('ORGANIZER') || (hasRole('TEAM_MANAGER') && resource.data.teamId == getUserData().teamId);
+    }
+
+    match /partidas/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || (hasRole('REFEREE') && resource.data.refereeId == request.auth.uid) || (hasRole('ORGANIZER') && resource.data.organizerId == request.auth.uid);
+    }
+
+    // CLASSIFICACOES e ARTILHARIA
+    match /classificacoes/{championshipId} {
+      allow read: if true;
+      allow write: if false; // Escrita apenas via Backend API
+
+      match /times/{teamId} {
+        allow read: if true;
+      }
+      match /artilheiros/{playerId} {
+        allow read: if true;
+      }
+    }
+
+    match /artilheiros/{id} {
+      allow read: if true;
+      allow write: if false; // Escrita apenas via Backend API
+    }
+
+    // EVENTOS GLOBAIS DE PARTIDA
+    match /eventos_partida/{id} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+
+    // AUDITORIA E LOGS
+    match /logs_auditoria/{id} {
+      allow read: if isStaff();
+      allow create: if isStaff();
+      allow update, delete: if false; // Logs são imutáveis
     }
   }
 }

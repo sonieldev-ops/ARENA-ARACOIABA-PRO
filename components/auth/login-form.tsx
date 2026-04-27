@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase/client';
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/admin';
+  const next = searchParams.get('next') || '/dashboard';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

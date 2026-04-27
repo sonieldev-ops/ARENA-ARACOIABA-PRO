@@ -28,15 +28,40 @@ export async function POST(req: NextRequest) {
           email: decoded.email,
           role: decoded.role || 'PUBLIC_USER',
           status: decoded.status || 'PENDING_APPROVAL',
+          accessVersion: decoded.accessVersion || 0,
         },
       },
       { status: 200 }
     );
 
+    const status = decoded.status || 'PENDING_APPROVAL';
+    const role = decoded.role || 'PUBLIC_USER';
+
     res.cookies.set({
       name: SESSION_COOKIE_NAME,
       value: sessionCookie,
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: SESSION_MAX_AGE_MS / 1000,
+    });
+
+    // Adiciona hints de estado para o Middleware
+    res.cookies.set({
+      name: 'user-status',
+      value: status,
+      httpOnly: false, // Middleware precisa ler
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: SESSION_MAX_AGE_MS / 1000,
+    });
+
+    res.cookies.set({
+      name: 'user-role',
+      value: role,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

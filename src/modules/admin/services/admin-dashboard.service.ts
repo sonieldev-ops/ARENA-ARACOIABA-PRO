@@ -14,19 +14,29 @@ import { UserProfile, UserStatus, UserRole } from '@/src/types/auth';
 
 export class AdminDashboardService {
   async getDashboardData(): Promise<AdminDashboardData> {
-    const usersRef = collection(db, 'users');
-    const auditRef = collection(db, 'adminAuditLogs');
+    const usersRef = collection(db, 'usuarios');
+    const auditRef = collection(db, 'logs_auditoria');
+    const championshipsRef = collection(db, 'campeonatos');
+    const teamsRef = collection(db, 'times');
+    const athletesRef = collection(db, 'atletas');
+    const matchesRef = collection(db, 'partidas');
 
     // 1. Métricas (KPIs) usando getCountFromServer para performance
     const [
       totalUsersSnap,
       pendingUsersSnap,
-      activeUsersSnap,
+      totalChampionshipsSnap,
+      totalTeamsSnap,
+      totalAthletesSnap,
+      totalLiveMatchesSnap,
       totalAdminsSnap
     ] = await Promise.all([
       getCountFromServer(usersRef),
       getCountFromServer(query(usersRef, where('status', '==', UserStatus.PENDING_APPROVAL))),
-      getCountFromServer(query(usersRef, where('status', '==', UserStatus.ACTIVE))),
+      getCountFromServer(championshipsRef),
+      getCountFromServer(teamsRef),
+      getCountFromServer(athletesRef),
+      getCountFromServer(query(matchesRef, where('status', '==', 'LIVE'))),
       getCountFromServer(query(usersRef, where('role', 'in', [UserRole.SUPER_ADMIN, UserRole.ORGANIZER])))
     ]);
 
@@ -40,9 +50,13 @@ export class AdminDashboardService {
     const metrics: AdminDashboardMetrics = {
       totalUsers: totalUsersSnap.data().count,
       pendingUsers: pendingUsersSnap.data().count,
-      activeUsers: activeUsersSnap.data().count,
+      activeUsers: totalUsersSnap.data().count - pendingUsersSnap.data().count,
       totalAdmins: totalAdminsSnap.data().count,
-      auditEventsLast24h: audit24hSnap.data().count
+      auditEventsLast24h: audit24hSnap.data().count,
+      totalChampionships: totalChampionshipsSnap.data().count,
+      totalTeams: totalTeamsSnap.data().count,
+      totalAthletes: totalAthletesSnap.data().count,
+      totalLiveMatches: totalLiveMatchesSnap.data().count,
     };
 
     // 2. Prévia de Usuários Pendentes (Últimos 5)

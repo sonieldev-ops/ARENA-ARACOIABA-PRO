@@ -1,24 +1,47 @@
-import * as admin from 'firebase-admin';
+import { cert, getApp, getApps, initializeApp, App } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 
-const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-        // Garante que as quebras de linha da chave privada sejam interpretadas corretamente
-        privateKey: privateKey?.replace(/\\n/g, '\n'),
-      }),
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-    });
-    console.log('>>> Firebase Admin inicializado com sucesso');
-  } catch (error) {
-    console.error('>>> Erro ao inicializar Firebase Admin:', error);
-  }
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value || !value.trim()) return "";
+  return value;
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
-export const adminStorage = admin.storage();
+function getPrivateKey(): string {
+  let key = process.env.FIREBASE_ADMIN_PRIVATE_KEY || "";
+  if (!key || key.includes("COLE_AQUI")) return "";
+  key = key.replace(/^["']|["']$/g, '');
+  return key.replace(/\\n/g, "\n");
+}
+
+let adminApp: App | undefined;
+
+try {
+  const projectId = getRequiredEnv("FIREBASE_ADMIN_PROJECT_ID");
+  const clientEmail = getRequiredEnv("FIREBASE_ADMIN_CLIENT_EMAIL");
+  const privateKey = getPrivateKey();
+
+  if (projectId && clientEmail && privateKey && privateKey.includes("BEGIN PRIVATE KEY")) {
+    adminApp = getApps().length > 0
+      ? getApp()
+      : initializeApp({
+          credential: cert({
+            projectId,
+            clientEmail,
+            privateKey,
+          }),
+        });
+    console.log("✅ [Firebase Admin] Inicializado com sucesso.");
+  } else {
+    console.warn("⚠️ [Firebase Admin] Credenciais incompletas no .env.local. Algumas funções de servidor estarão desativadas.");
+  }
+} catch (error) {
+  console.error("❌ [Firebase Admin] Erro ao inicializar:", error);
+}
+
+export const adminAuth = adminApp ? getAuth(adminApp) : null as any;
+export const adminDb = adminApp ? getFirestore(adminApp) : null as any;
+export const adminMessaging = adminApp ? getMessaging(adminApp) : null as any;
+export { adminApp };

@@ -19,7 +19,8 @@ export async function getSessionUser(): Promise<UserSession | null> {
   if (!sessionCookie) return null;
 
   try {
-    const decoded = await verifySessionCookieValue(sessionCookie);
+    // Verificamos a revogação para garantir que sessões banidas caiam rapidamente
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
 
     return {
       id: decoded.uid,
@@ -28,6 +29,7 @@ export async function getSessionUser(): Promise<UserSession | null> {
       role: (decoded.role as UserRole) || UserRole.PUBLIC_USER,
       status: (decoded.status as UserStatus) || UserStatus.PENDING_APPROVAL,
       isApproved: (decoded.isApproved as boolean) || false,
+      accessVersion: (decoded.accessVersion as number) || 0,
     };
   } catch (error) {
     console.error('getSessionUser error:', error);

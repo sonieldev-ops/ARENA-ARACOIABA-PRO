@@ -43,7 +43,7 @@ export function UserTeamLinkCard({ user }: { user: UserProfile }) {
           </div>
         </div>
 
-        <Link href={`/admin/teams/${user.teamId}`} passHref>
+        <Link href={`/admin/times/${user.teamId}`} passHref>
           <Button className="w-full" variant="secondary">
             <ExternalLink className="mr-2 h-4 w-4" /> Ver Detalhes da Equipe
           </Button>

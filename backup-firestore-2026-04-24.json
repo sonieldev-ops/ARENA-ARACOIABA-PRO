@@ -1,0 +1,978 @@
+{
+  "championships": [
+    {
+      "id": "champ-test-01",
+      "name": "Copa Arena Pro 2024",
+      "status": "ACTIVE",
+      "season": "2024",
+      "city": "Araçoiaba",
+      "createdAt": {
+        "_seconds": 1777034183,
+        "_nanoseconds": 50000000
+      },
+      "updatedAt": {
+        "_seconds": 1777034183,
+        "_nanoseconds": 50000000
+      }
+    },
+    {
+      "id": "copa-arena-2024",
+      "name": "Copa Arena Araçoiaba 2024",
+      "status": "OPEN",
+      "startDate": {
+        "_seconds": 1717200000,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1776993161,
+        "_nanoseconds": 520000000
+      }
+    }
+  ],
+  "teams": [
+    {
+      "id": "team-01",
+      "name": "Flamengo",
+      "color": "#FF0000",
+      "city": "Rio",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034183,
+        "_nanoseconds": 360000000
+      }
+    },
+    {
+      "id": "team-02",
+      "name": "Palmeiras",
+      "color": "#008000",
+      "city": "SP",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034184,
+        "_nanoseconds": 62000000
+      }
+    },
+    {
+      "id": "team-03",
+      "name": "São Paulo",
+      "color": "#FFFFFF",
+      "city": "SP",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034184,
+        "_nanoseconds": 387000000
+      }
+    },
+    {
+      "id": "team-04",
+      "name": "Corinthians",
+      "color": "#000000",
+      "city": "SP",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034185,
+        "_nanoseconds": 72000000
+      }
+    },
+    {
+      "id": "team-05",
+      "name": "Santos",
+      "color": "#FFFFFF",
+      "city": "Santos",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034185,
+        "_nanoseconds": 421000000
+      }
+    },
+    {
+      "id": "team-06",
+      "name": "Gremio",
+      "color": "#0000FF",
+      "city": "POA",
+      "status": "ACTIVE",
+      "championshipId": "champ-test-01",
+      "championshipName": "Copa Arena Pro 2024",
+      "createdAt": {
+        "_seconds": 1777034186,
+        "_nanoseconds": 104000000
+      }
+    },
+    {
+      "id": "time-fla",
+      "name": "Flamengo",
+      "championshipId": "copa-arena-2024",
+      "createdAt": {
+        "_seconds": 1776993161,
+        "_nanoseconds": 809000000
+      }
+    },
+    {
+      "id": "time-gre",
+      "name": "Grêmio",
+      "championshipId": "copa-arena-2024",
+      "createdAt": {
+        "_seconds": 1776993168,
+        "_nanoseconds": 362000000
+      }
+    },
+    {
+      "id": "time-pal",
+      "name": "Palmeiras",
+      "championshipId": "copa-arena-2024",
+      "createdAt": {
+        "_seconds": 1776993163,
+        "_nanoseconds": 954000000
+      }
+    },
+    {
+      "id": "time-spfc",
+      "name": "São Paulo",
+      "championshipId": "copa-arena-2024",
+      "createdAt": {
+        "_seconds": 1776993165,
+        "_nanoseconds": 906000000
+      }
+    }
+  ],
+  "athletes": [
+    {
+      "id": "ath-time-fla-1",
+      "fullName": "Atleta 1 do Flamengo",
+      "teamId": "time-fla",
+      "teamName": "Flamengo",
+      "number": 11,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993162,
+        "_nanoseconds": 490000000
+      }
+    },
+    {
+      "id": "ath-time-fla-2",
+      "fullName": "Atleta 2 do Flamengo",
+      "teamId": "time-fla",
+      "teamName": "Flamengo",
+      "number": 12,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993162,
+        "_nanoseconds": 931000000
+      }
+    },
+    {
+      "id": "ath-time-fla-3",
+      "fullName": "Atleta 3 do Flamengo",
+      "teamId": "time-fla",
+      "teamName": "Flamengo",
+      "number": 13,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993163,
+        "_nanoseconds": 628000000
+      }
+    },
+    {
+      "id": "ath-time-gre-1",
+      "fullName": "Atleta 1 do Grêmio",
+      "teamId": "time-gre",
+      "teamName": "Grêmio",
+      "number": 11,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993169,
+        "_nanoseconds": 46000000
+      }
+    },
+    {
+      "id": "ath-time-gre-2",
+      "fullName": "Atleta 2 do Grêmio",
+      "teamId": "time-gre",
+      "teamName": "Grêmio",
+      "number": 12,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993169,
+        "_nanoseconds": 350000000
+      }
+    },
+    {
+      "id": "ath-time-gre-3",
+      "fullName": "Atleta 3 do Grêmio",
+      "teamId": "time-gre",
+      "teamName": "Grêmio",
+      "number": 13,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993169,
+        "_nanoseconds": 966000000
+      }
+    },
+    {
+      "id": "ath-time-pal-1",
+      "fullName": "Atleta 1 do Palmeiras",
+      "teamId": "time-pal",
+      "teamName": "Palmeiras",
+      "number": 11,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993164,
+        "_nanoseconds": 653000000
+      }
+    },
+    {
+      "id": "ath-time-pal-2",
+      "fullName": "Atleta 2 do Palmeiras",
+      "teamId": "time-pal",
+      "teamName": "Palmeiras",
+      "number": 12,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993164,
+        "_nanoseconds": 936000000
+      }
+    },
+    {
+      "id": "ath-time-pal-3",
+      "fullName": "Atleta 3 do Palmeiras",
+      "teamId": "time-pal",
+      "teamName": "Palmeiras",
+      "number": 13,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993165,
+        "_nanoseconds": 583000000
+      }
+    },
+    {
+      "id": "ath-time-spfc-1",
+      "fullName": "Atleta 1 do São Paulo",
+      "teamId": "time-spfc",
+      "teamName": "São Paulo",
+      "number": 11,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993166,
+        "_nanoseconds": 603000000
+      }
+    },
+    {
+      "id": "ath-time-spfc-2",
+      "fullName": "Atleta 2 do São Paulo",
+      "teamId": "time-spfc",
+      "teamName": "São Paulo",
+      "number": 12,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993166,
+        "_nanoseconds": 927000000
+      }
+    },
+    {
+      "id": "ath-time-spfc-3",
+      "fullName": "Atleta 3 do São Paulo",
+      "teamId": "time-spfc",
+      "teamName": "São Paulo",
+      "number": 13,
+      "status": "ACTIVE",
+      "createdAt": {
+        "_seconds": 1776993167,
+        "_nanoseconds": 603000000
+      }
+    },
+    {
+      "id": "athlete-1",
+      "name": "Atleta 1",
+      "teamId": "team-02",
+      "teamName": "Palmeiras",
+      "number": "1",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034186,
+        "_nanoseconds": 438000000
+      }
+    },
+    {
+      "id": "athlete-10",
+      "name": "Atleta 10",
+      "teamId": "team-05",
+      "teamName": "Santos",
+      "number": "10",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034191,
+        "_nanoseconds": 554000000
+      }
+    },
+    {
+      "id": "athlete-11",
+      "name": "Atleta 11",
+      "teamId": "team-06",
+      "teamName": "Gremio",
+      "number": "11",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034191,
+        "_nanoseconds": 921000000
+      }
+    },
+    {
+      "id": "athlete-12",
+      "name": "Atleta 12",
+      "teamId": "team-01",
+      "teamName": "Flamengo",
+      "number": "12",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034192,
+        "_nanoseconds": 545000000
+      }
+    },
+    {
+      "id": "athlete-13",
+      "name": "Atleta 13",
+      "teamId": "team-02",
+      "teamName": "Palmeiras",
+      "number": "13",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034192,
+        "_nanoseconds": 958000000
+      }
+    },
+    {
+      "id": "athlete-14",
+      "name": "Atleta 14",
+      "teamId": "team-03",
+      "teamName": "São Paulo",
+      "number": "14",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034193,
+        "_nanoseconds": 570000000
+      }
+    },
+    {
+      "id": "athlete-15",
+      "name": "Atleta 15",
+      "teamId": "team-04",
+      "teamName": "Corinthians",
+      "number": "15",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034193,
+        "_nanoseconds": 888000000
+      }
+    },
+    {
+      "id": "athlete-16",
+      "name": "Atleta 16",
+      "teamId": "team-05",
+      "teamName": "Santos",
+      "number": "16",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034194,
+        "_nanoseconds": 496000000
+      }
+    },
+    {
+      "id": "athlete-17",
+      "name": "Atleta 17",
+      "teamId": "team-06",
+      "teamName": "Gremio",
+      "number": "17",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034194,
+        "_nanoseconds": 916000000
+      }
+    },
+    {
+      "id": "athlete-18",
+      "name": "Atleta 18",
+      "teamId": "team-01",
+      "teamName": "Flamengo",
+      "number": "18",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034195,
+        "_nanoseconds": 522000000
+      }
+    },
+    {
+      "id": "athlete-19",
+      "name": "Atleta 19",
+      "teamId": "team-02",
+      "teamName": "Palmeiras",
+      "number": "19",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034195,
+        "_nanoseconds": 918000000
+      }
+    },
+    {
+      "id": "athlete-2",
+      "name": "Atleta 2",
+      "teamId": "team-03",
+      "teamName": "São Paulo",
+      "number": "2",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034187,
+        "_nanoseconds": 116000000
+      }
+    },
+    {
+      "id": "athlete-20",
+      "name": "Atleta 20",
+      "teamId": "team-03",
+      "teamName": "São Paulo",
+      "number": "20",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034196,
+        "_nanoseconds": 541000000
+      }
+    },
+    {
+      "id": "athlete-21",
+      "name": "Atleta 21",
+      "teamId": "team-04",
+      "teamName": "Corinthians",
+      "number": "21",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034196,
+        "_nanoseconds": 873000000
+      }
+    },
+    {
+      "id": "athlete-22",
+      "name": "Atleta 22",
+      "teamId": "team-05",
+      "teamName": "Santos",
+      "number": "22",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034197,
+        "_nanoseconds": 568000000
+      }
+    },
+    {
+      "id": "athlete-23",
+      "name": "Atleta 23",
+      "teamId": "team-06",
+      "teamName": "Gremio",
+      "number": "23",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034197,
+        "_nanoseconds": 903000000
+      }
+    },
+    {
+      "id": "athlete-24",
+      "name": "Atleta 24",
+      "teamId": "team-01",
+      "teamName": "Flamengo",
+      "number": "24",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034198,
+        "_nanoseconds": 596000000
+      }
+    },
+    {
+      "id": "athlete-3",
+      "name": "Atleta 3",
+      "teamId": "team-04",
+      "teamName": "Corinthians",
+      "number": "3",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034187,
+        "_nanoseconds": 452000000
+      }
+    },
+    {
+      "id": "athlete-4",
+      "name": "Atleta 4",
+      "teamId": "team-05",
+      "teamName": "Santos",
+      "number": "4",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034188,
+        "_nanoseconds": 147000000
+      }
+    },
+    {
+      "id": "athlete-5",
+      "name": "Atleta 5",
+      "teamId": "team-06",
+      "teamName": "Gremio",
+      "number": "5",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034188,
+        "_nanoseconds": 894000000
+      }
+    },
+    {
+      "id": "athlete-6",
+      "name": "Atleta 6",
+      "teamId": "team-01",
+      "teamName": "Flamengo",
+      "number": "6",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034189,
+        "_nanoseconds": 587000000
+      }
+    },
+    {
+      "id": "athlete-7",
+      "name": "Atleta 7",
+      "teamId": "team-02",
+      "teamName": "Palmeiras",
+      "number": "7",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034189,
+        "_nanoseconds": 917000000
+      }
+    },
+    {
+      "id": "athlete-8",
+      "name": "Atleta 8",
+      "teamId": "team-03",
+      "teamName": "São Paulo",
+      "number": "8",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034190,
+        "_nanoseconds": 600000000
+      }
+    },
+    {
+      "id": "athlete-9",
+      "name": "Atleta 9",
+      "teamId": "team-04",
+      "teamName": "Corinthians",
+      "number": "9",
+      "position": "FW",
+      "status": "ACTIVE",
+      "goals": 0,
+      "createdAt": {
+        "_seconds": 1777034190,
+        "_nanoseconds": 909000000
+      }
+    }
+  ],
+  "matches": [
+    {
+      "id": "26CfsQFY6WV6v6ADjujO",
+      "championshipId": "copa-arena-2024",
+      "championshipName": "Copa Arena Araçoiaba 2024",
+      "teamAId": "time-gre",
+      "teamAName": "Grêmio",
+      "teamBId": "time-pal",
+      "teamBName": "Palmeiras",
+      "scoreA": 0,
+      "scoreB": 0,
+      "location": "cap",
+      "scheduledDate": {
+        "_seconds": 1776994140,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1776994210,
+        "_nanoseconds": 577000000
+      },
+      "actualStartTime": {
+        "_seconds": 1776994997,
+        "_nanoseconds": 671000000
+      },
+      "actualEndTime": {
+        "_seconds": 1776995305,
+        "_nanoseconds": 959000000
+      },
+      "status": "FINISHED"
+    },
+    {
+      "id": "87XGLBIziYJOj59e6oJp",
+      "championshipId": "copa-arena-2024",
+      "championshipName": "Copa Arena Araçoiaba 2024",
+      "teamAId": "time-spfc",
+      "teamAName": "São Paulo",
+      "teamBId": "time-fla",
+      "teamBName": "Flamengo",
+      "location": "fdd",
+      "scheduledDate": {
+        "_seconds": 1776994440,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1776994397,
+        "_nanoseconds": 15000000
+      },
+      "actualStartTime": {
+        "_seconds": 1776995366,
+        "_nanoseconds": 418000000
+      },
+      "scoreA": 1,
+      "scoreB": 1,
+      "actualEndTime": {
+        "_seconds": 1776995552,
+        "_nanoseconds": 541000000
+      },
+      "status": "FINISHED"
+    },
+    {
+      "id": "JHDHbozbI2Xi9nvCfHaq",
+      "championshipId": "copa-arena-2024",
+      "championshipName": "Copa Arena Araçoiaba 2024",
+      "teamAId": "time-pal",
+      "teamAName": "Palmeiras",
+      "teamBId": "time-spfc",
+      "teamBName": "São Paulo",
+      "scoreA": 0,
+      "scoreB": 0,
+      "status": "SCHEDULED",
+      "location": "casa",
+      "scheduledDate": {
+        "_seconds": 1777031700,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1777031699,
+        "_nanoseconds": 172000000
+      }
+    },
+    {
+      "id": "SNElJszKLO1qyvMxI63c",
+      "championshipId": "copa-arena-2024",
+      "championshipName": "Copa Arena Araçoiaba 2024",
+      "teamAId": "time-pal",
+      "teamAName": "Palmeiras",
+      "teamBId": "time-spfc",
+      "teamBName": "São Paulo",
+      "scoreA": 0,
+      "scoreB": 0,
+      "status": "SCHEDULED",
+      "location": "fdd",
+      "scheduledDate": {
+        "_seconds": 1776994440,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1776995281,
+        "_nanoseconds": 388000000
+      }
+    },
+    {
+      "id": "match-fin-1",
+      "teamAId": "team-03",
+      "teamBId": "team-04",
+      "status": "FINISHED",
+      "scoreA": 2,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "São Paulo",
+      "teamBName": "Corinthians",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034199,
+        "_nanoseconds": 609000000
+      },
+      "createdAt": {
+        "_seconds": 1777034199,
+        "_nanoseconds": 609000000
+      }
+    },
+    {
+      "id": "match-fin-2",
+      "teamAId": "team-05",
+      "teamBId": "team-06",
+      "status": "FINISHED",
+      "scoreA": 1,
+      "scoreB": 1,
+      "competitionId": "champ-test-01",
+      "teamAName": "Santos",
+      "teamBName": "Gremio",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034199,
+        "_nanoseconds": 928000000
+      },
+      "createdAt": {
+        "_seconds": 1777034199,
+        "_nanoseconds": 928000000
+      }
+    },
+    {
+      "id": "match-live",
+      "teamAId": "team-01",
+      "teamBId": "team-02",
+      "status": "LIVE",
+      "scoreA": 1,
+      "scoreB": 1,
+      "competitionId": "champ-test-01",
+      "teamAName": "Flamengo",
+      "teamBName": "Palmeiras",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034198,
+        "_nanoseconds": 917000000
+      },
+      "createdAt": {
+        "_seconds": 1777034198,
+        "_nanoseconds": 917000000
+      }
+    },
+    {
+      "id": "match-planned-1",
+      "teamAId": "team-02",
+      "teamBId": "team-03",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Palmeiras",
+      "teamBName": "São Paulo",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034200,
+        "_nanoseconds": 523000000
+      },
+      "createdAt": {
+        "_seconds": 1777034200,
+        "_nanoseconds": 523000000
+      }
+    },
+    {
+      "id": "match-planned-2",
+      "teamAId": "team-03",
+      "teamBId": "team-04",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "São Paulo",
+      "teamBName": "Corinthians",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034200,
+        "_nanoseconds": 952000000
+      },
+      "createdAt": {
+        "_seconds": 1777034200,
+        "_nanoseconds": 952000000
+      }
+    },
+    {
+      "id": "match-planned-3",
+      "teamAId": "team-04",
+      "teamBId": "team-05",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Corinthians",
+      "teamBName": "Santos",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034201,
+        "_nanoseconds": 450000000
+      },
+      "createdAt": {
+        "_seconds": 1777034201,
+        "_nanoseconds": 450000000
+      }
+    },
+    {
+      "id": "match-planned-4",
+      "teamAId": "team-05",
+      "teamBId": "team-06",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Santos",
+      "teamBName": "Gremio",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034201,
+        "_nanoseconds": 969000000
+      },
+      "createdAt": {
+        "_seconds": 1777034201,
+        "_nanoseconds": 969000000
+      }
+    },
+    {
+      "id": "match-planned-5",
+      "teamAId": "team-06",
+      "teamBId": "team-01",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Gremio",
+      "teamBName": "Flamengo",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034202,
+        "_nanoseconds": 379000000
+      },
+      "createdAt": {
+        "_seconds": 1777034202,
+        "_nanoseconds": 379000000
+      }
+    },
+    {
+      "id": "match-planned-6",
+      "teamAId": "team-01",
+      "teamBId": "team-02",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Flamengo",
+      "teamBName": "Palmeiras",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034202,
+        "_nanoseconds": 996000000
+      },
+      "createdAt": {
+        "_seconds": 1777034202,
+        "_nanoseconds": 996000000
+      }
+    },
+    {
+      "id": "match-planned-7",
+      "teamAId": "team-02",
+      "teamBId": "team-03",
+      "status": "SCHEDULED",
+      "scoreA": 0,
+      "scoreB": 0,
+      "competitionId": "champ-test-01",
+      "teamAName": "Palmeiras",
+      "teamBName": "São Paulo",
+      "location": "Arena Central",
+      "date": {
+        "_seconds": 1777034203,
+        "_nanoseconds": 318000000
+      },
+      "createdAt": {
+        "_seconds": 1777034203,
+        "_nanoseconds": 318000000
+      }
+    },
+    {
+      "id": "xwbv3oe8bEldK1GRRSQu",
+      "championshipId": "copa-arena-2024",
+      "championshipName": "Copa Arena Araçoiaba 2024",
+      "teamAId": "time-pal",
+      "teamAName": "Palmeiras",
+      "teamBId": "time-gre",
+      "teamBName": "Grêmio",
+      "location": "cap",
+      "scheduledDate": {
+        "_seconds": 1776994260,
+        "_nanoseconds": 0
+      },
+      "createdAt": {
+        "_seconds": 1776994262,
+        "_nanoseconds": 388000000
+      },
+      "actualStartTime": {
+        "_seconds": 1776994845,
+        "_nanoseconds": 769000000
+      },
+      "scoreA": 1,
+      "scoreB": 1,
+      "actualEndTime": {
+        "_seconds": 1776994988,
+        "_nanoseconds": 939000000
+      },
+      "status": "FINISHED"
+    }
+  ],
+  "users": [
+    {
+      "id": "VX5EHm7fvbMGuTxeMgvxTipPlMH2",
+      "accessVersion": 1,
+      "role": "SUPER_ADMIN",
+      "approvalRequired": false,
+      "isApproved": true,
+      "status": "ACTIVE",
+      "updatedAt": {
+        "_seconds": 1776992358,
+        "_nanoseconds": 50000000
+      }
+    }
+  ],
+  "adminAuditLogs": [],
+  "rankings": [],
+  "scorers": []
+}

@@ -23,23 +23,31 @@ export function StatusDistributionChart({ data, loading }: StatusDistributionCha
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={data.map(item => ({
+                  ...item,
+                  statusLabel: 
+                    item.status === 'ACTIVE' ? 'Ativo' :
+                    item.status === 'PENDING_APPROVAL' ? 'Pendente' :
+                    item.status === 'BLOCKED' ? 'Bloqueado' :
+                    item.status === 'SUSPENDED' ? 'Suspenso' : item.status
+                }))}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={80}
                 paddingAngle={5}
                 dataKey="count"
-                nameKey="status"
+                nameKey="statusLabel"
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '12px' }}
+                formatter={(value: any, name: any) => [value, name]}
               />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px' }} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>

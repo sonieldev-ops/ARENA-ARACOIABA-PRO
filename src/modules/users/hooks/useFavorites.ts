@@ -22,7 +22,7 @@ export function useFavorites() {
       return;
     }
 
-    const q = query(collection(db, 'users', user.uid, 'favorites'));
+    const q = query(collection(db, 'usuarios', user.uid, 'favorites'));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const favs = snapshot.docs.map(doc => doc.id);
@@ -39,7 +39,7 @@ export function useFavorites() {
   const toggleFavorite = async (teamId: string) => {
     if (!user) throw new Error("Usuário não autenticado");
 
-    const favRef = doc(db, 'users', user.uid, 'favorites', teamId);
+    const favRef = doc(db, 'usuarios', user.uid, 'favorites', teamId);
 
     if (favorites.includes(teamId)) {
       await deleteDoc(favRef);

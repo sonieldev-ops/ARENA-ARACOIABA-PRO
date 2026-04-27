@@ -28,7 +28,7 @@ async function seedRanking() {
   const championshipId = "champ-2024";
   console.log(`🏆 Gerando ranking e artilharia para o campeonato: ${championshipId}`);
 
-  const rankingRef = adminDb.collection("rankings").document(championshipId).collection("teams");
+  const rankingRef = adminDb.collection("classificacoes").doc(championshipId).collection("times");
 
   const teamsData = [
     { teamId: "team-01", teamName: "Leões do Norte", points: 12, games: 5, wins: 4, draws: 0, losses: 1, goalsFor: 10, goalsAgainst: 3, goalDifference: 7, position: 1 },
@@ -42,7 +42,7 @@ async function seedRanking() {
     await rankingRef.doc(team.teamId).set(team);
   }
 
-  const scorersRef = adminDb.collection("rankings").document(championshipId).collection("scorers");
+  const scorersRef = adminDb.collection("classificacoes").doc(championshipId).collection("artilheiros");
 
   const scorersData = [
     { id: "scorer-01", playerName: "Ricardo Oliveira", teamName: "Leões do Norte", goals: 6, teamId: "team-01" },

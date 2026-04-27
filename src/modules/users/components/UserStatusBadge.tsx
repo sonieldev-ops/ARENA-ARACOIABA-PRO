@@ -1,20 +1,19 @@
 import { UserStatus } from '@/src/types/auth';
-import { Badge } from '@/components/ui/badge';
 
 const statusConfig: Record<UserStatus, { label: string; className: string }> = {
-  [UserStatus.PENDING_APPROVAL]: { label: 'Pendente', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  [UserStatus.ACTIVE]: { label: 'Ativo', className: 'bg-green-100 text-green-800 border-green-200' },
-  [UserStatus.SUSPENDED]: { label: 'Suspenso', className: 'bg-orange-100 text-orange-800 border-orange-200' },
-  [UserStatus.BLOCKED]: { label: 'Bloqueado', className: 'bg-red-100 text-red-800 border-red-200' },
-  [UserStatus.REJECTED]: { label: 'Rejeitado', className: 'bg-gray-100 text-gray-800 border-gray-200' },
-  [UserStatus.DEACTIVATED]: { label: 'Desativado', className: 'bg-slate-100 text-slate-800 border-slate-200' },
+  [UserStatus.PENDING_APPROVAL]: { label: 'PENDENTE', className: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
+  [UserStatus.ACTIVE]: { label: 'ATIVO', className: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]' },
+  [UserStatus.SUSPENDED]: { label: 'SUSPENSO', className: 'bg-orange-500/10 text-orange-500 border-orange-500/20' },
+  [UserStatus.BLOCKED]: { label: 'BLOQUEADO', className: 'bg-rose-500/10 text-rose-500 border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]' },
+  [UserStatus.REJECTED]: { label: 'REJEITADO', className: 'bg-zinc-800 text-zinc-500 border-zinc-700' },
+  [UserStatus.DEACTIVATED]: { label: 'DESATIVADO', className: 'bg-zinc-900 text-zinc-600 border-zinc-800' },
 };
 
 export function UserStatusBadge({ status }: { status: UserStatus }) {
   const config = statusConfig[status] || { label: status, className: '' };
 
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.className}`}>
+    <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${config.className}`}>
       {config.label}
     </span>
   );

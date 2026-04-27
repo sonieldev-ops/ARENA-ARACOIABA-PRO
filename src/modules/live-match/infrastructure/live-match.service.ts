@@ -3,84 +3,105 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  runTransaction,
   collection,
-  addDoc,
-  Timestamp
+  runTransaction,
+  setDoc
 } from "firebase/firestore";
+import { removeUndefined } from "@/src/lib/utils";
 
 export const liveMatchService = {
   async startMatch(matchId: string) {
-    const matchRef = doc(db, "matches", matchId);
-    await updateDoc(matchRef, {
-      status: "LIVE",
-      startedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-  },
-
-  async finishMatch(matchId: string) {
-    const matchRef = doc(db, "matches", matchId);
-    await updateDoc(matchRef, {
-      status: "FINISHED",
-      finishedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    // Trigger para recalcular ranking via API (opcional, ou pode ser via Cloud Function)
+    const matchRef = doc(db, "partidas", matchId);
     try {
-      await fetch('/api/admin/ranking/recalculate', { method: 'POST' });
-    } catch (e) {
-      console.error("Erro ao disparar recálculo de ranking", e);
+      await updateDoc(matchRef, removeUndefined({
+        status: "LIVE",
+        startedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        scoreA: 0,
+        scoreB: 0
+      }));
+      fetch('/api/admin/matches/live', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'START', matchId })
+      }).catch(() => {});
+    } catch (error: any) {
+      console.error("Erro ao iniciar:", error);
+      throw error;
     }
   },
 
-  async registerGoal(matchId: string, teamSide: 'A' | 'B', athlete: any, currentMinute: number) {
-    const matchRef = doc(db, "matches", matchId);
-    const eventRef = collection(db, "matches", matchId, "events");
+  async finishMatch(matchId: string) {
+    const matchRef = doc(db, "partidas", matchId);
+    await updateDoc(matchRef, removeUndefined({
+      status: "FINISHED",
+      finishedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    }));
+  },
 
+  async registerGoal(matchId: string, teamSide: 'A' | 'B', athlete: any, currentMinute: number, matchData: any) {
+    const teamId = String((teamSide === 'A' ? matchData?.teamAId : matchData?.teamBId) || "no-team");
+    const teamName = String((teamSide === 'A' ? matchData?.teamAName : matchData?.teamBName) || "Time");
+    const name = String(athlete?.name || "GOL");
+    const id = String(athlete?.id || "geral");
+
+    const matchRef = doc(db, "partidas", matchId);
     await runTransaction(db, async (transaction) => {
-      const matchDoc = await transaction.get(matchRef);
-      if (!matchDoc.exists()) throw "Partida não existe";
+      const docSnap = await transaction.get(matchRef);
+      const data = docSnap.data() || {};
+      const currentScore = data[`score${teamSide}`] || 0;
 
-      const matchData = matchDoc.data();
-      const newScore = (matchData[`score${teamSide}`] || 0) + 1;
-
-      // 1. Atualiza Placar
-      transaction.update(matchRef, {
-        [`score${teamSide}`]: newScore,
+      transaction.update(matchRef, removeUndefined({
+        [`score${teamSide}`]: currentScore + 1,
         updatedAt: serverTimestamp()
+      }));
+
+      const eventRef = doc(collection(db, "partidas", matchId, "events"));
+
+      // OBJETO ULTRA-REDUNDANTE PARA SATISFAZER TRIGGERS/EXTENSIONS INVISÍVEIS
+      const redundantEvent = removeUndefined({
+        type: "GOAL",
+        teamId: teamId,
+        teamName: teamName,
+        athleteId: id || null,
+        playerId: id || null,
+        athleteName: name || null,
+        playerName: name || null,
+        name: name || null,
+        label: name || null,
+        minute: Number(currentMinute),
+        createdAt: serverTimestamp(),
+        // Campos extras que extensões costumam pedir
+        matchId: String(matchId),
+        timestamp: Date.now()
       });
 
-      // 2. Cria Evento
-      const newEvent = {
-        type: "GOAL",
-        teamId: teamSide === 'A' ? matchData.teamAId : matchData.teamBId,
-        teamName: teamSide === 'A' ? matchData.teamAName : matchData.teamBName,
-        athleteId: athlete?.id || null,
-        athleteName: athlete?.name || "GOL",
-        minute: currentMinute,
-        createdAt: serverTimestamp(),
-      };
-
-      const newEventRef = doc(eventRef);
-      transaction.set(newEventRef, newEvent);
+      transaction.set(eventRef, redundantEvent);
     });
   },
 
-  async registerCard(matchId: string, type: 'YELLOW' | 'RED', teamSide: 'A' | 'B', athlete: any, currentMinute: number) {
-    const matchRef = doc(db, "matches", matchId);
-    const eventRef = collection(db, "matches", matchId, "events");
+  async registerCard(matchId: string, type: 'YELLOW' | 'RED', teamSide: 'A' | 'B', athlete: any, currentMinute: number, matchData: any) {
+    const teamId = String((teamSide === 'A' ? matchData?.teamAId : matchData?.teamBId) || "no-team");
+    const teamName = String((teamSide === 'A' ? matchData?.teamAName : matchData?.teamBName) || "Time");
+    const name = String(athlete?.name || "Jogador");
+    const id = String(athlete?.id || "geral");
 
-    const matchDoc = await (await doc(db, "matches", matchId)).id; // apenas para validacao se necessario
-
-    await addDoc(eventRef, {
-      type: type === 'YELLOW' ? "YELLOW_CARD" : "RED_CARD",
-      teamId: teamSide === 'A' ? "teamA" : "teamB", // Idealmente buscar do doc
-      athleteId: athlete?.id || null,
-      athleteName: athlete?.name || "Jogador",
-      minute: currentMinute,
-      createdAt: serverTimestamp(),
-    });
+    const eventRef = doc(collection(db, "partidas", matchId, "events"));
+    await setDoc(eventRef, removeUndefined({
+        type: type === 'YELLOW' ? "YELLOW_CARD" : "RED_CARD",
+        teamId: teamId,
+        teamName: teamName,
+        athleteId: id || null,
+        playerId: id || null,
+        athleteName: name || null,
+        playerName: name || null,
+        name: name || null,
+        label: name || null,
+        minute: Number(currentMinute),
+        createdAt: serverTimestamp(),
+        matchId: String(matchId),
+        timestamp: Date.now()
+    }));
   }
 };

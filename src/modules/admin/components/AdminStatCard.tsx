@@ -24,18 +24,22 @@ export function AdminStatCard({ label, value, icon: Icon, trend, color = "red" }
   return (
     <Card className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-all overflow-hidden group">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</p>
-            <h3 className="text-3xl font-black text-white tracking-tighter">{value}</h3>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 truncate" title={label}>
+              {label}
+            </p>
+            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tighter truncate">
+              {value}
+            </h3>
             {trend && (
-              <p className={`text-xs font-bold mt-2 ${trend.isUp ? 'text-green-500' : 'text-red-500'}`}>
-                {trend.isUp ? '↑' : '↓'} {trend.value} <span className="text-slate-500 ml-1">vs mês passado</span>
+              <p className={`text-[10px] font-bold mt-2 truncate ${trend.isUp ? 'text-green-500' : 'text-red-500'}`}>
+                {trend.isUp ? '↑' : '↓'} {trend.value}
               </p>
             )}
           </div>
-          <div className={`p-4 rounded-2xl ${colorMap[color]} group-hover:scale-110 transition-transform duration-300`}>
-            <Icon className="h-6 w-6" />
+          <div className={`p-3 md:p-4 rounded-2xl flex-shrink-0 ${colorMap[color]} group-hover:scale-110 transition-transform duration-300`}>
+            <Icon className="h-5 w-5 md:h-6 md:w-6" />
           </div>
         </div>
       </CardContent>

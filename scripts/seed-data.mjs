@@ -1,16 +1,18 @@
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { readFileSync } from 'fs';
+import * as dotenv from 'dotenv';
 import { join } from 'path';
 
-const serviceAccount = JSON.parse(
-  readFileSync(join(process.cwd(), 'service-account.json'), 'utf8')
-);
+dotenv.config({ path: join(process.cwd(), '.env.local') });
 
 if (!getApps().length) {
   initializeApp({
-    credential: cert(serviceAccount)
+    credential: cert({
+      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/^["']|["']$/g, ''),
+    }),
   });
 }
 
@@ -49,7 +51,7 @@ async function seed() {
     });
   }
 
-  // 3. Athletes (20+)
+  // 3. Athletes (24)
   for (let i = 1; i <= 24; i++) {
     const team = teams[(i % 6)];
     await db.collection("athletes").doc(`athlete-${i}`).set({
@@ -64,7 +66,7 @@ async function seed() {
     });
   }
 
-  // 4. Matches (10 total: 1 LIVE, 2 FINISHED, 7 PLANNED)
+  // 4. Matches (10 total: 1 LIVE, 2 FINISHED, 7 SCHEDULED)
   const matches = [
     { id: "match-live", teamAId: "team-01", teamBId: "team-02", status: "LIVE", scoreA: 1, scoreB: 1 },
     { id: "match-fin-1", teamAId: "team-03", teamBId: "team-04", status: "FINISHED", scoreA: 2, scoreB: 0 },

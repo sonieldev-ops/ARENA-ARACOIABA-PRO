@@ -10,7 +10,7 @@ import {
   endAt,
   getCountFromServer
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db } from '@/src/lib/firebase/client';
 import { UserRole, UserStatus } from '@/src/types/auth';
 import {
   GovernanceSummary,
@@ -42,7 +42,7 @@ export class GovernanceDashboardService {
 
     return {
       kpis: [
-        { label: 'Pendentes', value: pendingCount, variant: 'warning', description: 'Usuários aguardando aprovação', link: '/admin/users?status=PENDING_APPROVAL' },
+        { label: 'Pendentes', value: pendingCount, variant: 'warning', description: 'Usuários aguardando aprovação', link: '/admin/usuarios?status=PENDING_APPROVAL' },
         { label: 'Ativos', value: activeCount, variant: 'success', description: 'Usuários com acesso total' },
         { label: 'Bloqueados', value: blockedCount, variant: 'destructive', description: 'Acessos revogados por segurança' },
         { label: 'Suspensos', value: suspendedCount, variant: 'info', description: 'Acessos temporariamente inativos' },
@@ -71,28 +71,63 @@ export class GovernanceDashboardService {
   }
 
   private async getRecentAuditLogs(limitCount: number): Promise<RecentAuditItem[]> {
-    const q = query(
-      collection(db, 'adminAuditLogs'),
+    // 1. Buscar logs administrativos (usuários)
+    const qAdmin = query(
+      collection(db, 'logs_auditoria'),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
-    const snap = await getDocs(q);
+    
+    // 2. Buscar logs de partidas (eventos, placares)
+    const qMatch = query(
+      collection(db, 'match_audit_logs'),
+      orderBy('timestamp', 'desc'),
+      limit(limitCount)
+    );
 
-    // Em produção, faríamos join com nomes de usuários ou salvaríamos denormalizado no log
-    return snap.docs.map(doc => {
+    const [adminSnap, matchSnap] = await Promise.all([
+      getDocs(qAdmin),
+      getDocs(qMatch)
+    ]);
+
+    const adminLogs = adminSnap.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
         actorUserId: data.actorUserId,
-        actorName: 'Operador', // TODO: Fetch ou Denormalize
+        actorName: data.userName || 'Administrador',
         targetUserId: data.targetUserId,
-        targetName: 'Usuário Alvo',
+        targetName: data.targetName || 'Sistema',
         action: data.action,
         reason: data.reason,
         createdAt: data.createdAt,
         correlationId: data.correlationId
       };
     });
+
+    const matchLogs = matchSnap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        actorUserId: data.userId,
+        actorName: data.userName || 'Árbitro',
+        targetUserId: data.matchId,
+        targetName: data.matchName || `Partida ${data.matchId?.substring(0, 5)}`,
+        action: data.action,
+        reason: data.details || '',
+        createdAt: data.timestamp,
+        correlationId: data.matchId
+      };
+    });
+
+    // Combinar e ordenar por data decrescente
+    const combined = [...adminLogs, ...matchLogs].sort((a, b) => {
+      const timeA = a.createdAt?.seconds || 0;
+      const timeB = b.createdAt?.seconds || 0;
+      return timeB - timeA;
+    });
+
+    return combined.slice(0, limitCount);
   }
 
   private generateAlerts(pending: number, blocked: number): any[] {
@@ -104,7 +139,7 @@ export class GovernanceDashboardService {
         title: 'Fila de aprovação acumulada',
         message: `Existem ${pending} usuários aguardando aprovação. O tempo de resposta pode estar acima do SLA.`,
         actionLabel: 'Ver Pendentes',
-        actionUrl: '/admin/users?status=PENDING_APPROVAL'
+        actionUrl: '/admin/usuarios?status=PENDING_APPROVAL'
       });
     }
     if (blocked > 0) {

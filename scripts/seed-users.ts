@@ -29,8 +29,8 @@ async function seed() {
       email: 'admin@arena.com',
       password: 'AdminPassword123!',
       displayName: 'Admin Arena',
-      role: 'ADMIN',
-      status: 'APPROVED'
+      role: 'SUPER_ADMIN',
+      status: 'ACTIVE'
     },
     {
       uid: 'user-test-uid',
@@ -38,7 +38,7 @@ async function seed() {
       password: 'UserPassword123!',
       displayName: 'Atleta Teste',
       role: 'ATHLETE',
-      status: 'APPROVED'
+      status: 'ACTIVE'
     }
   ];
 
@@ -53,7 +53,7 @@ async function seed() {
       });
 
       // 2. Criar no Firestore
-      await db.collection('users').doc(user.uid).set({
+      await db.collection('usuarios').doc(user.uid).set({
         name: user.displayName,
         email: user.email,
         role: user.role,

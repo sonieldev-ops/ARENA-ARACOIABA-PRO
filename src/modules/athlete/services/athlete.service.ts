@@ -21,14 +21,14 @@ import { UserProfile } from '@/src/types/auth';
 export class AthleteService {
   async getDashboardData(uid: string): Promise<AthleteDashboardData> {
     // 1. Buscar Perfil do Atleta
-    const userDoc = await getDoc(doc(db, 'users', uid));
+    const userDoc = await getDoc(doc(db, 'usuarios', uid));
     if (!userDoc.exists()) throw new Error('Athlete profile not found');
     const profile = { uid: userDoc.id, ...userDoc.data() } as UserProfile;
 
     // 2. Buscar Time (se houver teamId)
     let team: TeamInfo | null = null;
     if (profile.teamId) {
-      const teamDoc = await getDoc(doc(db, 'teams', profile.teamId));
+      const teamDoc = await getDoc(doc(db, 'times', profile.teamId));
       if (teamDoc.exists()) {
         team = { id: teamDoc.id, ...teamDoc.data() } as TeamInfo;
       }
@@ -37,7 +37,7 @@ export class AthleteService {
     // 3. Buscar Próxima Partida
     let nextMatch: MatchInfo | null = null;
     if (profile.teamId) {
-      const matchesRef = collection(db, 'matches');
+      const matchesRef = collection(db, 'partidas');
       const qMatch = query(
         matchesRef,
         where('teamIds', 'array-contains', profile.teamId),

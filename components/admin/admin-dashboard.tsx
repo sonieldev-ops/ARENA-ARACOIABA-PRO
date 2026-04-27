@@ -32,14 +32,14 @@ export function AdminDashboard() {
         <SystemStatusBadge status="online" />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <Swords className="w-5 h-5 text-blue-500" />
@@ -49,7 +49,7 @@ export function AdminDashboard() {
               Ver todos os jogos
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {todayMatches.map((match, i) => (
               <MatchCardAdmin key={i} {...match} />
             ))}
@@ -70,9 +70,14 @@ export function AdminDashboard() {
             <p className="text-zinc-500 text-sm mb-6 leading-relaxed">
               Precisa de ajuda estratégica para sua liga? Nosso time de especialistas está a um clique de distância.
             </p>
-            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-900/30 active:scale-95">
+            <a
+              href="https://wa.me/5581993518254?text=Olá, preciso de suporte estratégico para a Arena Araçoiaba Pro."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all text-xs uppercase tracking-[0.2em] shadow-lg shadow-blue-900/30 active:scale-95 flex items-center justify-center gap-2"
+            >
               Falar com Gerente
-            </button>
+            </a>
           </div>
         </div>
       </div>

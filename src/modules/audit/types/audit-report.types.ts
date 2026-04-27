@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
+import { UserProfile } from '@/types/auth';
 
 export type AuditSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -30,11 +31,14 @@ export interface AuditLogItem {
   source: AuditSource;
   correlationId: string;
   reason?: string;
-  before?: any;
-  after?: any;
-  metadata?: Record<string, any>;
-  ip?: string;
-  userAgent?: string;
+  before?: Partial<UserProfile> | any;
+  after?: Partial<UserProfile> | any;
+  metadata?: {
+    ip?: string;
+    userAgent?: string;
+    sessionId?: string;
+    appVersion?: string;
+  };
   createdAt: Timestamp;
 }
 

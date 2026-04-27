@@ -1,9 +1,10 @@
 import { adminDb } from "@/src/lib/firebase/admin";
 import { FieldValue, Transaction } from "firebase-admin/firestore";
+import { removeUndefined } from "@/src/lib/utils";
 
 export async function updateRankingAfterMatch(matchId: string, transaction: Transaction) {
-  const matchRef = adminDb.collection("matches").doc(matchId);
-  const matchDoc = await transaction.get(matchRef);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
+  const matchDoc = await transaction.get(matchRef) as any;
 
   if (!matchDoc.exists) return;
   const match = matchDoc.data()!;
@@ -12,8 +13,8 @@ export async function updateRankingAfterMatch(matchId: string, transaction: Tran
 
   const { teamAId, teamBId, scoreA, scoreB, competitionId } = match;
 
-  const teamARef = adminDb.collection("championships").doc(competitionId).collection("ranking").doc(teamAId);
-  const teamBRef = adminDb.collection("championships").doc(competitionId).collection("ranking").doc(teamBId);
+  const teamARef = adminDb.collection("campeonatos").doc(competitionId).collection("ranking").doc(teamAId);
+  const teamBRef = adminDb.collection("campeonatos").doc(competitionId).collection("ranking").doc(teamBId);
 
   // Determinar resultados
   let pointsA = 0, pointsB = 0;
@@ -41,6 +42,6 @@ export async function updateRankingAfterMatch(matchId: string, transaction: Tran
     updatedAt: FieldValue.serverTimestamp()
   });
 
-  transaction.set(teamARef, updateTeam(pointsA, winA, draw, lossA, scoreA, scoreB), { merge: true });
-  transaction.set(teamBRef, updateTeam(pointsB, winB, draw, lossB, scoreB, scoreA), { merge: true });
+  transaction.set(teamARef, removeUndefined(updateTeam(pointsA, winA, draw, lossA, scoreA, scoreB)), { merge: true });
+  transaction.set(teamBRef, removeUndefined(updateTeam(pointsB, winB, draw, lossB, scoreB, scoreA)), { merge: true });
 }

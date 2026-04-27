@@ -46,5 +46,25 @@ export const ADMIN_NOTIFICATION_TEMPLATES: Record<NotificationType, (data: any) 
     title: data.title || 'Alerta do Sistema',
     body: data.message || '',
     priority: data.priority || NotificationPriority.NORMAL
+  }),
+  [NotificationType.MATCH_UPDATE]: (data) => ({
+    title: 'Atualização de Partida',
+    body: data.message || 'Houve uma atualização na sua partida.',
+    priority: NotificationPriority.NORMAL
+  }),
+  [NotificationType.CHAMPIONSHIP_ALERT]: (data) => ({
+    title: 'Alerta de Campeonato',
+    body: data.message || 'Novidades no seu campeonato.',
+    priority: NotificationPriority.HIGH
+  }),
+  [NotificationType.SYSTEM_NOTICE]: (data) => ({
+    title: 'Aviso do Sistema',
+    body: data.message || 'Comunicado importante.',
+    priority: NotificationPriority.LOW
+  }),
+  [NotificationType.GENERIC]: (data) => ({
+    title: data.title || 'Notificação',
+    body: data.body || '',
+    priority: data.priority || NotificationPriority.NORMAL
   })
 };

@@ -1,10 +1,11 @@
 import { adminDb, adminAuth } from "@/src/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { logAudit } from "./audit.service";
+import { removeUndefined } from "@/src/lib/utils";
 
 export class UsersAdminService {
   async list(filters: { role?: string; status?: string } = {}) {
-    let query: any = adminDb.collection("users");
+    let query: any = adminDb.collection("usuarios");
 
     if (filters.role) query = query.where("role", "==", filters.role);
     if (filters.status) query = query.where("status", "==", filters.status);
@@ -14,10 +15,10 @@ export class UsersAdminService {
   }
 
   async updateUserRole(userId: string, role: string, operatorId: string) {
-    await adminDb.collection("users").doc(userId).update({
+    await adminDb.collection("usuarios").doc(userId).update(removeUndefined({
       role,
       updatedAt: FieldValue.serverTimestamp()
-    });
+    }));
 
     // Update Custom Claims
     await adminAuth.setCustomUserClaims(userId, { role });
@@ -33,10 +34,10 @@ export class UsersAdminService {
   }
 
   async updateUserStatus(userId: string, status: string, operatorId: string, reason?: string) {
-    await adminDb.collection("users").doc(userId).update({
+    await adminDb.collection("usuarios").doc(userId).update(removeUndefined({
       status,
       updatedAt: FieldValue.serverTimestamp()
-    });
+    }));
 
     await logAudit({
       action: "UPDATE_USER_STATUS",
@@ -50,7 +51,7 @@ export class UsersAdminService {
   }
 
   async getPendingApprovals() {
-    const snapshot = await adminDb.collection("users")
+    const snapshot = await adminDb.collection("usuarios")
       .where("status", "==", "PENDING_APPROVAL")
       .get();
     return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));

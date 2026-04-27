@@ -1,6 +1,5 @@
 import { AdminAuditLog } from '../types/user-detail.types';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { formatFirebaseDate } from '@/src/lib/utils';
 import {
   UserPlus,
   UserCheck,
@@ -31,8 +30,7 @@ export function UserAuditEventCard({ log }: { log: AdminAuditLog }) {
   const Icon = config.icon;
 
   const formatDate = (date: any) => {
-    const d = date?.toDate?.() || new Date(date);
-    return format(d, "dd/MM/yyyy HH:mm:ss", { locale: ptBR });
+    return formatFirebaseDate(date);
   };
 
   // Helper para renderizar diffs simples

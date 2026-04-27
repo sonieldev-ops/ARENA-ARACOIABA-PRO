@@ -126,7 +126,7 @@ export class AuditReportService {
    * Resolução de nomes/emails (Pode ser otimizado com cache ou materialização no log)
    */
   async resolveUserInfo(userId: string) {
-    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userDoc = await getDoc(doc(db, 'usuarios', userId));
     if (userDoc.exists()) {
       const data = userDoc.data();
       return {

@@ -6,7 +6,7 @@ export const PUBLIC_PATHS = [
   '/register',
   '/forgot-password',
   '/championships',
-  '/matches',
+  '/partidas',
   '/standings',
   '/teams',
   '/athletes',
@@ -25,19 +25,19 @@ export const PROTECTED_RULES: ProtectedRule[] = [
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.REFEREE, UserRole.STAFF],
   },
   {
-    prefix: '/admin/championships',
+    prefix: '/admin/campeonatos',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER],
   },
   {
-    prefix: '/admin/teams',
+    prefix: '/admin/times',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.STAFF],
   },
   {
-    prefix: '/admin/athletes',
+    prefix: '/admin/atletas',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.STAFF],
   },
   {
-    prefix: '/admin/matches',
+    prefix: '/admin/partidas',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.REFEREE, UserRole.STAFF],
   },
   {

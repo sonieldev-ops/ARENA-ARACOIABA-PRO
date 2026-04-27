@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { firebaseDb } from "@/src/lib/firebase/client";
+import { db } from "@/src/lib/firebase/client";
 import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 
 export interface TopScorer {
@@ -23,7 +23,7 @@ export function useTopScorers(championshipId: string, maxResults: number = 10) {
     if (!championshipId) return;
 
     const q = query(
-      collection(firebaseDb, "rankings", championshipId, "scorers"),
+      collection(db, "classificacoes", championshipId, "scorers"),
       orderBy("goals", "desc"),
       limit(maxResults)
     );

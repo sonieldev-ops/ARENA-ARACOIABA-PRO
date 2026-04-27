@@ -6,6 +6,10 @@ export interface AdminDashboardMetrics {
   activeUsers: number;
   totalAdmins: number;
   auditEventsLast24h: number;
+  totalChampionships: number;
+  totalTeams: number;
+  totalAthletes: number;
+  totalLiveMatches: number;
 }
 
 export interface AuditEvent {

@@ -28,7 +28,7 @@ async function resetAndStart() {
   console.log("🧹 Finalizando todas as partidas ao vivo...");
 
   // 1. Buscar todas as partidas LIVE
-  const liveMatches = await adminDb.collection("matches").where("status", "==", "LIVE").get();
+  const liveMatches = await adminDb.collection("partidas").where("status", "==", "LIVE").get();
 
   const batch = adminDb.batch();
   liveMatches.forEach(doc => {
@@ -45,7 +45,7 @@ async function resetAndStart() {
   const matchId = "match-new-live-" + Date.now();
   console.log(`🚀 Iniciando nova partida: ${matchId}...`);
 
-  const matchRef = adminDb.collection("matches").doc(matchId);
+  const matchRef = adminDb.collection("partidas").doc(matchId);
   await matchRef.set({
     id: matchId,
     teamAId: "team-01", // Leões do Norte

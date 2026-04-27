@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Executar Transação
-    await adminDb.runTransaction(async (transaction) => {
-      const userRef = adminDb.collection('users').doc(userId);
+    await adminDb.runTransaction(async (transaction: any) => {
+      const userRef = adminDb.collection('usuarios').doc(userId);
       const userSnap = await transaction.get(userRef);
 
       if (!userSnap.exists) throw new Error('User not found');
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       });
 
       // 2. Adicionar ao Elenco do Time
-      const memberRef = adminDb.collection('teams').doc(inviteData!.teamId).collection('members').doc(userId);
+      const memberRef = adminDb.collection('times').doc(inviteData!.teamId).collection('members').doc(userId);
       transaction.set(memberRef, {
         userId,
         userName: userData?.fullName || 'Atleta',
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       });
 
       // 4. Log de Auditoria
-      const auditRef = adminDb.collection('adminAuditLogs').doc();
+      const auditRef = adminDb.collection('logs_auditoria').doc();
       transaction.set(auditRef, {
         action: 'INVITE_ACCEPTED',
         operatorName: userData?.fullName,

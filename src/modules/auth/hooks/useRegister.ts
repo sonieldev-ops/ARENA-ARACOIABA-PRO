@@ -13,6 +13,7 @@ export function useRegister() {
     email: string;
     pass: string;
     fullName: string;
+    phone?: string;
     requestedRole: UserRole
   }) => {
     setLoading(true);

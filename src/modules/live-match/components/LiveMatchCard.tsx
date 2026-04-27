@@ -41,22 +41,34 @@ export function LiveMatchCard({ match, events }: { match: any, events: any[] }) 
       <div className="flex items-center justify-between gap-4 mb-8">
         <div className="flex flex-col items-center flex-1">
           <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mb-3 border border-gray-700 shadow-inner">
-             <span className="text-2xl font-black text-white">{match.teamAName.substring(0,2).toUpperCase()}</span>
+             <span className="text-2xl font-black text-white">
+               {typeof match.teamAName === 'string' ? match.teamAName.substring(0,2).toUpperCase() : '??'}
+             </span>
           </div>
-          <span className="text-xs font-bold text-gray-400 text-center uppercase truncate w-24">{match.teamAName}</span>
+          <span className="text-xs font-bold text-gray-400 text-center uppercase truncate w-24">
+            {typeof match.teamAName === 'string' ? match.teamAName : 'Time Inválido'}
+          </span>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="text-6xl font-black text-white tabular-nums tracking-tighter">{match.scoreA}</span>
+          <span className="text-6xl font-black text-white tabular-nums tracking-tighter">
+            {typeof match.scoreA === 'object' ? '?' : (match.scoreA ?? 0)}
+          </span>
           <span className="text-gray-700 font-black text-2xl">:</span>
-          <span className="text-6xl font-black text-white tabular-nums tracking-tighter">{match.scoreB}</span>
+          <span className="text-6xl font-black text-white tabular-nums tracking-tighter">
+            {typeof match.scoreB === 'object' ? '?' : (match.scoreB ?? 0)}
+          </span>
         </div>
 
         <div className="flex flex-col items-center flex-1">
           <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mb-3 border border-gray-700 shadow-inner">
-             <span className="text-2xl font-black text-white">{match.teamBName.substring(0,2).toUpperCase()}</span>
+             <span className="text-2xl font-black text-white">
+               {typeof match.teamBName === 'string' ? match.teamBName.substring(0,2).toUpperCase() : '??'}
+             </span>
           </div>
-          <span className="text-xs font-bold text-gray-400 text-center uppercase truncate w-24">{match.teamBName}</span>
+          <span className="text-xs font-bold text-gray-400 text-center uppercase truncate w-24">
+            {typeof match.teamBName === 'string' ? match.teamBName : 'Time Inválido'}
+          </span>
         </div>
       </div>
 
@@ -78,7 +90,11 @@ export function LiveMatchCard({ match, events }: { match: any, events: any[] }) 
                   {event.type === 'YELLOW_CARD' && <div className="w-2 h-3 bg-yellow-400 rounded-sm" />}
                   {event.type === 'RED_CARD' && <div className="w-2 h-3 bg-red-500 rounded-sm" />}
                   <span className="text-[11px] text-gray-200">
-                    <b className="text-white uppercase">{event.type}</b> - {event.playerName}
+                    <b className="text-white uppercase">
+                      {event.type === 'GOAL' ? 'GOL' :
+                       event.type === 'YELLOW_CARD' ? 'AMARELO' :
+                       event.type === 'RED_CARD' ? 'VERMELHO' : event.type}
+                    </b> - {event.playerName}
                   </span>
                 </div>
               </div>

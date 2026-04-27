@@ -1,6 +1,7 @@
 import { AuditEvent } from "../types/admin-dashboard.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { History, User, Activity, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { formatFirebaseDate, translateAction } from "@/src/lib/utils";
 
 export function AdminRecentActivity({ events }: { events: AuditEvent[] }) {
   const getSeverityIcon = (severity: string) => {
@@ -29,9 +30,9 @@ export function AdminRecentActivity({ events }: { events: AuditEvent[] }) {
                 <div className="mt-1">{getSeverityIcon(event.severity)}</div>
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-slate-900">{event.action}</p>
+                    <p className="text-sm font-bold text-slate-900">{translateAction(event.action)}</p>
                     <span className="text-[10px] font-medium text-slate-400">
-                      {event.timestamp?.toDate?.()?.toLocaleString('pt-BR') || 'Recent'}
+                      {formatFirebaseDate(event.timestamp) || 'Recente'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-600">

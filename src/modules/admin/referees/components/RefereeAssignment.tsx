@@ -4,15 +4,18 @@ import { useState } from 'react';
 import { Referee, ROLE_LABELS } from '../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShieldCheck, User, Users, ClipboardList, Timer } from 'lucide-react';
+import { ShieldCheck, User, Users, ClipboardList, Timer, Swords } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface RefereeAssignmentProps {
   referees: Referee[];
-  onAssign: (assignment: any) => void;
+  matches: any[];
+  onAssign: (matchId: string, assignment: any) => void;
+  isLoading?: boolean;
 }
 
-export function RefereeAssignment({ referees, onAssign }: RefereeAssignmentProps) {
+export function RefereeAssignment({ referees, matches, onAssign, isLoading }: RefereeAssignmentProps) {
+  const [selectedMatchId, setSelectedMatchId] = useState('');
   const [assignment, setAssignment] = useState({
     main: '',
     assistant1: '',
@@ -47,7 +50,26 @@ export function RefereeAssignment({ referees, onAssign }: RefereeAssignmentProps
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase text-zinc-500 tracking-widest px-1 flex items-center gap-2">
+            <Swords className="w-3 h-3" /> Selecionar Partida
+          </label>
+          <Select value={selectedMatchId} onValueChange={setSelectedMatchId}>
+            <SelectTrigger className="bg-zinc-950 border-zinc-800 text-white rounded-xl h-14 shadow-inner">
+              <SelectValue placeholder="Escolha um confronto agendado..." />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+              {matches.filter(m => m.status === 'SCHEDULED' || m.status === 'LIVE').map(match => (
+                <SelectItem key={match.id} value={match.id}>
+                  {match.teamAName} vs {match.teamBName} - {match.scheduledDate?.toDate?.().toLocaleDateString('pt-BR')}
+                </SelectItem>
+              ))}
+              {matches.length === 0 && <div className="p-4 text-center text-xs text-zinc-500">Nenhuma partida encontrada</div>}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 pt-4">
           {positions.map((pos) => (
             <div key={pos.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-zinc-950/40 rounded-2xl border border-zinc-800/50">
               <div className="flex items-center gap-3 sm:w-48">
@@ -81,10 +103,11 @@ export function RefereeAssignment({ referees, onAssign }: RefereeAssignmentProps
         </div>
 
         <Button
-          onClick={() => onAssign(assignment)}
+          onClick={() => onAssign(selectedMatchId, assignment)}
+          disabled={!selectedMatchId || isLoading}
           className="w-full bg-zinc-100 hover:bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] py-4 rounded-xl transition-all shadow-xl active:scale-[0.98]"
         >
-          Confirmar Escalação
+          {isLoading ? 'Processando...' : 'Confirmar Escalação Oficial'}
         </Button>
       </CardContent>
     </Card>

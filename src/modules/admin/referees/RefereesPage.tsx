@@ -1,42 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, ShieldCheck, Filter, Users } from 'lucide-react';
+import { Plus, Search, ShieldCheck, Filter, Users, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { MOCK_REFEREES } from './mock';
 import { RefereeCard } from './components/RefereeCard';
 import { RefereeForm } from './components/RefereeForm';
 import { RefereeAssignment } from './components/RefereeAssignment';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
+import { useReferees } from './hooks/useReferees';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/src/lib/firebase/client';
 
 export function RefereesPage() {
-  const [referees, setReferees] = useState(MOCK_REFEREES);
+  const { referees, loading, addReferee, assignRefereesToMatch } = useReferees();
+  const [matches, setMatches] = useState<any[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  useEffect(() => {
+    async function fetchMatches() {
+      try {
+        const q = query(collection(db, 'partidas'), orderBy('scheduledDate', 'desc'));
+        const snap = await getDocs(q);
+        setMatches(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      } catch (e) {
+        console.error('Error fetching matches:', e);
+      } finally {
+        setLoadingMatches(false);
+      }
+    }
+    fetchMatches();
+  }, []);
 
   const filteredReferees = referees.filter(ref =>
     ref.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     ref.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddReferee = (data: any) => {
-    const newReferee = {
-      ...data,
-      id: Math.random().toString(36).substr(2, 9),
-      gamesCount: 0,
-    };
-    setReferees([newReferee, ...referees]);
-    toast.success('Árbitro cadastrado com sucesso!');
+  const handleAddReferee = async (data: any) => {
+    await addReferee(data);
   };
 
-  const handleAssign = (assignment: any) => {
-    console.log('Assignment:', assignment);
-    toast.success('Escalação de arbitragem confirmada!');
+  const handleAssign = async (matchId: string, assignment: any) => {
+    setIsAssigning(true);
+    try {
+      await assignRefereesToMatch(matchId, assignment);
+    } finally {
+      setIsAssigning(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-40 gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+        <p className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Sincronizando arbitragem...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-20">
@@ -100,7 +126,12 @@ export function RefereesPage() {
         </TabsContent>
 
         <TabsContent value="assign" className="mt-0 max-w-3xl mx-auto">
-          <RefereeAssignment referees={referees} onAssign={handleAssign} />
+          <RefereeAssignment
+            referees={referees}
+            matches={matches}
+            onAssign={handleAssign}
+            isLoading={isAssigning}
+          />
         </TabsContent>
       </Tabs>
 
