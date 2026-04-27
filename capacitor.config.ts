@@ -1,16 +1,16 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.arena.aracoiabapro',
   appName: 'Arena Araçoiaba Pro',
   webDir: 'out',
   server: {
-    url: 'https://meu-projeto-ten-rose.vercel.app',
+    url: 'https://arena-aracoiaba-pro.vercel.app',
     allowNavigation: [
       'arena-aracoiaba-pro.firebaseapp.com',
       'arena-aracoiaba-pro.web.app',
       'arenaaracoiaba.com.br',
-      'meu-projeto-ten-rose.vercel.app'
+      'arena-aracoiaba-pro.vercel.app'
     ],
     cleartext: false
   },
