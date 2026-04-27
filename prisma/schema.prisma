@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+
+enum UserRole {
+  SUPER_ADMIN
+  ORGANIZER
+  REFEREE
+  STAFF
+  TEAM_MANAGER
+  ATHLETE
+  PUBLIC_USER
+}
+
+enum MatchLiveStatus {
+  SCHEDULED
+  PRE_GAME
+  LIVE
+  HALF_TIME
+  EXTRA_TIME
+  PENALTIES
+  FINISHED
+  SUSPENDED
+  CANCELED
+  WO
+  REVIEW_PENDING
+  HOMOLOGATED
+}
+
+enum MatchPeriod {
+  PRE_MATCH
+  FIRST_HALF
+  HALF_TIME
+  SECOND_HALF
+  EXTRA_TIME_FIRST_HALF
+  EXTRA_TIME_SECOND_HALF
+  PENALTY_SHOOTOUT
+  POST_MATCH
+}
+
+enum MatchEventType {
+  MATCH_STARTED
+  HALF_TIME_STARTED
+  SECOND_HALF_STARTED
+  EXTRA_TIME_STARTED
+  PENALTY_SHOOTOUT_STARTED
+  MATCH_ENDED
+  GOAL
+  OWN_GOAL
+  YELLOW_CARD
+  RED_CARD
+  SECOND_YELLOW_RED
+  SUBSTITUTION
+  PENALTY_AWARDED
+  PENALTY_SCORED
+  PENALTY_MISSED
+  FOUL
+  OFFSIDE
+  VAR_REVIEW
+  ADMIN_NOTE
+  STATUS_CHANGED
+  WO_DECLARED
+  MATCH_SUSPENDED
+  MATCH_RESUMED
+  EVENT_CORRECTED
+}
+
+enum MatchEventSource {
+  ADMIN_PANEL
+  REFEREE_DEVICE
+  STAFF_DEVICE
+  SYSTEM
+  IMPORT
+  API
+}
+
+enum MatchEventState {
+  PENDING
+  CONFIRMED
+  REVERTED
+  REJECTED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PUBLISHED
+  FAILED
+  DEAD_LETTER
+}
+
+// --- MODELS ---
+
+model User {
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String?
+  role           UserRole     @default(PUBLIC_USER)
+
+  // Relations to match events
+  actedEvents    MatchEvent[] @relation("EventActor")
+  revertedEvents MatchEvent[] @relation("EventReverter")
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Team {
+  id        String       @id @default(cuid())
+  name      String
+  logoUrl   String?
+
+  // Relations
+  events    MatchEvent[]
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Athlete {
+  id                String       @id @default(cuid())
+  name              String
+  photoUrl          String?
+
+  // Relations
+  mainEvents        MatchEvent[] @relation("MainAthlete")
+  secondaryEvents   MatchEvent[] @relation("RelatedAthlete")
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+model Match {
+  id            String       @id @default(cuid())
+  date          DateTime
+  homeTeamId    String
+  awayTeamId    String
+
+  // Live Match link
+  liveMatch     LiveMatch?
+  events        MatchEvent[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+/// Representa o estado agregado e consolidado de uma partida ao vivo.
+/// Utilizado para fornecer respostas O(1) para o placar e status atual.
+model LiveMatch {
+  id                String          @id @default(cuid())
+  matchId           String          @unique
+  status            MatchLiveStatus @default(SCHEDULED)
+  currentPeriod     MatchPeriod     @default(PRE_MATCH)
+
+  // Placar consolidado
+  homeScore         Int             @default(0)
+  awayScore         Int             @default(0)
+  homePenaltyScore  Int?            @default(0)
+  awayPenaltyScore  Int?            @default(0)
+
+  // Controle de tempo (em segundos para precisão)
+  currentMinute     Int             @default(0)
+  currentSecond     Int             @default(0)
+
+  // Controle de Integridade e Sincronização
+  lastSequenceNumber Int            @default(0)
+  version            Int            @default(1) // Optimistic Locking
+  isActive           Boolean        @default(false)
+  isHomologated      Boolean        @default(false)
+
+  // Snapshot em JSON para recuperação rápida de estado no cliente
+  stateSnapshot     Json?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relacionamentos
+  match             Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  events            MatchEvent[]
+
+  @@index([status])
+}
+
+/// A "Fonte da Verdade" (Event Store) da partida.
+/// Todo registro aqui deve ser imutável após confirmado, exceto por reversão lógica.
+model MatchEvent {
+  id                String           @id @default(cuid())
+  matchId           String
+  liveMatchId       String
+  type              MatchEventType
+  state             MatchEventState  @default(CONFIRMED)
+
+  // Temporalidade do evento
+  minute            Int
+  second            Int?             @default(0)
+  period            MatchPeriod
+
+  // Entidades envolvidas
+  teamId            String?
+  athleteId         String?
+  relatedAthleteId  String?          // Ex: Atleta que entrou na substituição ou deu assistência
+
+  // Auditoria de autoria
+  actorUserId       String           // Usuário que registrou o evento
+  source            MatchEventSource @default(ADMIN_PANEL)
+
+  // Payload flexível para detalhes específicos do evento
+  payload           Json?
+
+  // --- CONTROLES DE CONSISTÊNCIA ---
+
+  // Ordem absoluta dos eventos dentro de uma partida
+  sequenceNumber    Int
+
+  // Versão do modelo de dados do evento
+  version           Int              @default(1)
+
+  // IDs para evitar duplicidade em retentativas (Idempotência)
+  correlationId     String?          @unique
+  idempotencyKey    String?          @unique
+
+  // --- LÓGICA DE REVERSÃO ---
+
+  isReverted        Boolean          @default(false)
+  revertedAt        DateTime?
+  revertedByUserId  String?
+  revertReason      String?
+
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  // Relacionamentos
+  liveMatch         LiveMatch        @relation(fields: [liveMatchId], references: [id])
+  match             Match            @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  team              Team?            @relation(fields: [teamId], references: [id])
+  athlete           Athlete?         @relation("MainAthlete", fields: [athleteId], references: [id])
+  relatedAthlete    Athlete?         @relation("RelatedAthlete", fields: [relatedAthleteId], references: [id])
+  actorUser         User             @relation("EventActor", fields: [actorUserId], references: [id])
+  revertedByUser    User?            @relation("EventReverter", fields: [revertedByUserId], references: [id])
+
+  // Constraints de Integridade
+  @@unique([matchId, sequenceNumber]) // Garante ordenação estrita sem buracos por partida
+  @@index([matchId, createdAt])       // Timeline rápida
+  @@index([liveMatchId, state])       // Filtro de eventos ativos
+}
+
+/// Padrão Outbox para garantir que a publicação em tempo real
+/// ocorra de forma confiável após a transação do banco ser confirmada.
+model MatchRealtimeOutbox {
+  id                String           @id @default(cuid())
+  matchId           String
+  eventType         String           // Categoria do broadcast (ex: SCORE_UPDATE, NEW_EVENT)
+  payload           Json             // O payload que será enviado via WebSocket/SSE
+  status            OutboxStatus     @default(PENDING)
+  attempts          Int              @default(0)
+  lastError         String?
+
+  createdAt         DateTime         @default(now())
+  processedAt       DateTime?
+
+  @@index([status, createdAt])
+  @@index([matchId])
+}

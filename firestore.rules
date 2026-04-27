@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isSignedIn() && request.auth.token.role == 'SUPER_ADMIN';
+    }
+
+    function isOrganizer() {
+      return isSignedIn() && request.auth.token.role == 'ORGANIZER';
+    }
+
+    function canAdminUsers() {
+      return isSuperAdmin() || isOrganizer();
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || canAdminUsers());
+
+      // Permite criar o perfil inicial (geralmente feito no signup via server, mas bom ter aqui)
+      allow create: if isSignedIn() && request.auth.uid == uid;
+
+      // Bloqueia alteração direta de campos de governança pelo cliente
+      allow update: if isSignedIn()
+        && request.auth.uid == uid
+        && !('role' in request.resource.data.diff(resource.data).changedKeys())
+        && !('status' in request.resource.data.diff(resource.data).changedKeys())
+        && !('isApproved' in request.resource.data.diff(resource.data).changedKeys())
+        && !('approvalRequired' in request.resource.data.diff(resource.data).changedKeys());
+
+      allow delete: if isSuperAdmin();
+    }
+
+    match /adminAuditLogs/{logId} {
+      allow read: if canAdminUsers();
+      allow write: if false; // Apenas via Admin SDK (Server)
+    }
+  }
+}
