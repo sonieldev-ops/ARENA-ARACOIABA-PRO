@@ -9,7 +9,7 @@ function getRequiredEnv(name: string): string {
 }
 
 function getPrivateKey(): string {
-  let key = process.env.FIREBASE_ADMIN_PRIVATE_KEY || "";
+  let key = process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.FIREBASE_PRIVATE_KEY || "";
   if (!key || key.includes("COLE_AQUI")) return "";
   key = key.replace(/^["']|["']$/g, '');
   return key.replace(/\\n/g, "\n");
@@ -18,8 +18,8 @@ function getPrivateKey(): string {
 let adminApp: App | undefined;
 
 try {
-  const projectId = getRequiredEnv("FIREBASE_ADMIN_PROJECT_ID");
-  const clientEmail = getRequiredEnv("FIREBASE_ADMIN_CLIENT_EMAIL");
+  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = getPrivateKey();
 
   if (projectId && clientEmail && privateKey && privateKey.includes("BEGIN PRIVATE KEY")) {
