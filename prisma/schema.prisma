@@ -101,62 +101,70 @@ enum OutboxStatus {
 
 // --- MODELS ---
 
-model Usuario {
+model User {
   id             String          @id @default(cuid())
   email          String          @unique
   name           String?
   role           UserRole        @default(PUBLIC_USER)
 
   // Relations to match events
-  actedEvents    EventoPartida[] @relation("EventActor")
-  revertedEvents EventoPartida[] @relation("EventReverter")
+  actedEvents    MatchEvent[]    @relation("EventActor")
+  revertedEvents MatchEvent[]    @relation("EventReverter")
 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@map("Usuario")
 }
 
-model Time {
+model Team {
   id        String          @id @default(cuid())
   name      String
   logoUrl   String?
 
   // Relations
-  events    EventoPartida[]
+  events    MatchEvent[]
 
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
+
+  @@map("Time")
 }
 
-model Atleta {
+model Athlete {
   id                String          @id @default(cuid())
   name              String
   photoUrl          String?
 
   // Relations
-  mainEvents        EventoPartida[] @relation("MainAthlete")
-  secondaryEvents   EventoPartida[] @relation("RelatedAthlete")
+  mainEvents        MatchEvent[]    @relation("MainAthlete")
+  secondaryEvents   MatchEvent[]    @relation("RelatedAthlete")
 
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+
+  @@map("Atleta")
 }
 
-model Partida {
+model Match {
   id            String          @id @default(cuid())
   date          DateTime
   homeTeamId    String
   awayTeamId    String
 
   // Live Match link
-  liveMatch     PartidaAoVivo?
-  events        EventoPartida[]
+  liveMatch     LiveMatch?
+  events        MatchEvent[]
 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+
+  @@map("Partida")
 }
 
 /// Representa o estado agregado e consolidado de uma partida ao vivo.
 /// Utilizado para fornecer respostas O(1) para o placar e status atual.
-model PartidaAoVivo {
+model LiveMatch {
   id                String          @id @default(cuid())
   matchId           String          @unique
   status            MatchLiveStatus @default(SCHEDULED)
@@ -185,15 +193,16 @@ model PartidaAoVivo {
   updatedAt         DateTime        @updatedAt
 
   // Relacionamentos
-  match             Partida         @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  events            EventoPartida[]
+  match             Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  events            MatchEvent[]
 
   @@index([status])
+  @@map("PartidaAoVivo")
 }
 
 /// A "Fonte da Verdade" (Event Store) da partida.
 /// Todo registro aqui deve ser imutável após confirmado, exceto por reversão lógica.
-model EventoPartida {
+model MatchEvent {
   id                String           @id @default(cuid())
   matchId           String
   liveMatchId       String
@@ -240,23 +249,24 @@ model EventoPartida {
   updatedAt         DateTime         @updatedAt
 
   // Relacionamentos
-  liveMatch         PartidaAoVivo    @relation(fields: [liveMatchId], references: [id])
-  match             Partida          @relation(fields: [matchId], references: [id], onDelete: Restrict)
-  team              Time?            @relation(fields: [teamId], references: [id])
-  athlete           Atleta?          @relation("MainAthlete", fields: [athleteId], references: [id])
-  relatedAthlete    Atleta?          @relation("RelatedAthlete", fields: [relatedAthleteId], references: [id])
-  actorUser         Usuario          @relation("EventActor", fields: [actorUserId], references: [id])
-  revertedByUser    Usuario?         @relation("EventReverter", fields: [revertedByUserId], references: [id])
+  liveMatch         LiveMatch        @relation(fields: [liveMatchId], references: [id])
+  match             Match            @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  team              Team?            @relation(fields: [teamId], references: [id])
+  athlete           Athlete?         @relation("MainAthlete", fields: [athleteId], references: [id])
+  relatedAthlete    Athlete?         @relation("RelatedAthlete", fields: [relatedAthleteId], references: [id])
+  actorUser         User             @relation("EventActor", fields: [actorUserId], references: [id])
+  revertedByUser    User?            @relation("EventReverter", fields: [revertedByUserId], references: [id])
 
   // Constraints de Integridade
   @@unique([matchId, sequenceNumber]) // Garante ordenação estrita sem buracos por partida
   @@index([matchId, createdAt])       // Timeline rápida
   @@index([liveMatchId, state])       // Filtro de eventos ativos
+  @@map("EventoPartida")
 }
 
 /// Padrão Outbox para garantir que a publicação em tempo real
 /// ocorra de forma confiável após a transação do banco ser confirmada.
-model OutboxTempoRealPartida {
+model LiveMatchOutbox {
   id                String           @id @default(cuid())
   matchId           String
   eventType         String           // Categoria do broadcast (ex: SCORE_UPDATE, NEW_EVENT)
@@ -270,4 +280,5 @@ model OutboxTempoRealPartida {
 
   @@index([status, createdAt])
   @@index([matchId])
+  @@map("OutboxTempoRealPartida")
 }
