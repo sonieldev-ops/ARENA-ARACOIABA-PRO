@@ -115,43 +115,48 @@ export default function PublicMatchesPage() {
             <Calendar className="w-5 h-5" />
             <h2 className="font-black uppercase tracking-[0.3em] text-sm italic">PRÓXIMOS E ENCERRADOS</h2>
           </div>
-          <div className="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden divide-y divide-white/5">
+          <div className="bg-zinc-900/40 border border-white/5 rounded-[2rem] overflow-hidden divide-y divide-white/5">
             {otherMatches.map(match => (
-              <Link key={match.id} href={`/partida/${match.id}`} className="flex flex-col md:flex-row items-center justify-between p-8 hover:bg-white/5 transition-all group gap-6">
-                <div className="flex items-center gap-12 flex-1 w-full justify-center md:justify-start">
-                  <div className="flex items-center gap-4 w-48 justify-end">
-                    <span className="font-black text-sm uppercase italic group-hover:text-[#FACC15] transition-colors">{match.teamAName}</span>
-                    <div className="w-10 h-10 bg-zinc-800 rounded-xl border border-white/5 flex items-center justify-center font-bold text-xs text-zinc-600">
-                        {match.teamAName?.substring(0, 2).toUpperCase()}
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col items-center">
-                    <div className="text-2xl font-black italic bg-zinc-800/50 px-6 py-2 rounded-2xl group-hover:bg-[#FACC15] group-hover:text-black transition-all border border-white/5">
-                      {match.scoreA} - {match.scoreB}
-                    </div>
-                    <Badge variant="outline" className="mt-2 border-zinc-800 text-[9px] font-black tracking-widest text-zinc-500">
-                        {match.status === 'FINISHED' ? 'FINALIZADO' : 'AGENDADO'}
-                    </Badge>
-                  </div>
-
-                  <div className="flex items-center gap-4 w-48 justify-start">
-                    <div className="w-10 h-10 bg-zinc-800 rounded-xl border border-white/5 flex items-center justify-center font-bold text-xs text-zinc-600">
-                        {match.teamBName?.substring(0, 2).toUpperCase()}
-                    </div>
-                    <span className="font-black text-sm uppercase italic group-hover:text-[#FACC15] transition-colors">{match.teamBName}</span>
+              <Link key={match.id} href={`/partida/${match.id}`} className="flex items-center justify-between p-4 md:p-6 hover:bg-[#FACC15]/5 transition-all group gap-4">
+                {/* Time A */}
+                <div className="flex flex-1 items-center justify-end gap-3">
+                  <span className="font-black text-xs md:text-sm uppercase italic group-hover:text-[#FACC15] transition-colors truncate">
+                    {match.teamAName}
+                  </span>
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800 rounded-full border border-white/10 flex-shrink-0 flex items-center justify-center font-bold text-[10px] text-zinc-400 group-hover:border-[#FACC15]/50">
+                    {match.teamAName?.substring(0, 2).toUpperCase()}
                   </div>
                 </div>
+
+                {/* Placar Central */}
+                <div className="flex flex-col items-center min-w-[80px] md:min-w-[120px]">
+                  <div className="bg-zinc-950 px-4 py-2 md:px-6 md:py-2.5 rounded-xl border border-white/5 flex items-center gap-2 md:gap-3 group-hover:border-[#FACC15]/30">
+                    <span className="text-lg md:text-2xl font-black italic tabular-nums">{match.scoreA}</span>
+                    <span className="text-zinc-700 font-bold">-</span>
+                    <span className="text-lg md:text-2xl font-black italic tabular-nums">{match.scoreB}</span>
+                  </div>
+                  <span className={cn(
+                    "text-[8px] md:text-[9px] font-black tracking-[0.2em] mt-2 uppercase",
+                    match.status === 'FINISHED' ? 'text-zinc-500' : 'text-[#FACC15]'
+                  )}>
+                    {match.status === 'FINISHED' ? 'Encerrado' : 'Agendado'}
+                  </span>
+                </div>
+
+                {/* Time B */}
+                <div className="flex flex-1 items-center justify-start gap-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 bg-zinc-800 rounded-full border border-white/10 flex-shrink-0 flex items-center justify-center font-bold text-[10px] text-zinc-400 group-hover:border-[#FACC15]/50">
+                    {match.teamBName?.substring(0, 2).toUpperCase()}
+                  </div>
+                  <span className="font-black text-xs md:text-sm uppercase italic group-hover:text-[#FACC15] transition-colors truncate">
+                    {match.teamBName}
+                  </span>
+                </div>
                 
-                <div className="text-center md:text-right min-w-[150px] space-y-1">
-                  <div className="text-[10px] font-black text-[#FACC15] uppercase tracking-widest flex items-center justify-center md:justify-end gap-1.5">
-                    <Calendar className="w-3 h-3" />
-                    {match.scheduledDate?.toDate().toLocaleDateString('pt-BR')}
-                  </div>
-                  <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest flex items-center justify-center md:justify-end gap-1.5">
-                    <MapPin className="w-3 h-3" />
-                    {match.location}
-                  </div>
+                {/* Info Lateral (Data/Local) - Oculto em telas muito pequenas se necessário, ou empilhado */}
+                <div className="hidden sm:flex flex-col items-end min-w-[100px] border-l border-white/5 pl-4 ml-2">
+                  <span className="text-[9px] font-black text-[#FACC15]">{match.scheduledDate?.toDate().toLocaleDateString('pt-BR')}</span>
+                  <span className="text-[8px] font-bold text-zinc-600 uppercase truncate max-w-[80px]">{match.location}</span>
                 </div>
               </Link>
             ))}
