@@ -19,14 +19,14 @@ import { db } from '@/src/lib/firebase/client';
 import { removeUndefined } from '@/src/lib/utils';
 import { NotificationItem, NotificationFilterState, NotificationCounters } from '../types/notification.types';
 
-const NOTIFICATIONS_COLLECTION = 'notifications';
+const NOTIFICATIONS_COLLECTION = 'notificacoes';
 
 export const notificationsService = {
   /**
    * Listen to unread count in real-time
    */
   listenUnreadCount(userId: string, callback: (count: number) => void) {
-    const metaRef = doc(db, `users/${userId}/metadata/notifications`);
+    const metaRef = doc(db, `usuarios/${userId}/metadata/notificacoes`);
     return onSnapshot(metaRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data() as NotificationCounters;
@@ -41,7 +41,7 @@ export const notificationsService = {
    * Listen to recent notifications
    */
   listenRecentNotifications(userId: string, limitCount: number = 5, callback: (notifications: NotificationItem[]) => void) {
-    const notificationsRef = collection(db, `users/${userId}/${NOTIFICATIONS_COLLECTION}`);
+    const notificationsRef = collection(db, `usuarios/${userId}/${NOTIFICATIONS_COLLECTION}`);
     const q = query(
       notificationsRef,
       orderBy('createdAt', 'desc'),
@@ -66,7 +66,7 @@ export const notificationsService = {
     pageSize: number = 20,
     lastVisible?: QueryDocumentSnapshot
   ) {
-    const notificationsRef = collection(db, `users/${userId}/${NOTIFICATIONS_COLLECTION}`);
+    const notificationsRef = collection(db, `usuarios/${userId}/${NOTIFICATIONS_COLLECTION}`);
     let q = query(notificationsRef, orderBy('createdAt', 'desc'));
 
     if (filters.isRead !== undefined) {
@@ -101,8 +101,8 @@ export const notificationsService = {
    * Mark a single notification as read
    */
   async markAsRead(userId: string, notificationId: string) {
-    const docRef = doc(db, `users/${userId}/${NOTIFICATIONS_COLLECTION}`, notificationId);
-    const metaRef = doc(db, `users/${userId}/metadata/notifications`);
+    const docRef = doc(db, `usuarios/${userId}/${NOTIFICATIONS_COLLECTION}`, notificationId);
+    const metaRef = doc(db, `usuarios/${userId}/metadata/notificacoes`);
 
     const batch = writeBatch(db);
     batch.update(docRef, removeUndefined({
@@ -129,7 +129,7 @@ export const notificationsService = {
     // exists to handle this safely and avoid many client writes.
     // For now, let's implement a batch of the most recent unread.
 
-    const notificationsRef = collection(db, `users/${userId}/${NOTIFICATIONS_COLLECTION}`);
+    const notificationsRef = collection(db, `usuarios/${userId}/${NOTIFICATIONS_COLLECTION}`);
     const q = query(notificationsRef, where('isRead', '==', false), limit(100));
     const snapshot = await getDocs(q);
 
@@ -140,7 +140,7 @@ export const notificationsService = {
       batch.update(d.ref, removeUndefined({ isRead: true, readAt: Timestamp.now() }));
     });
 
-    const metaRef = doc(db, `users/${userId}/metadata/notifications`);
+    const metaRef = doc(db, `usuarios/${userId}/metadata/notificacoes`);
     batch.set(metaRef, removeUndefined({
       unreadCount: 0,
       lastUpdatedAt: Timestamp.now()

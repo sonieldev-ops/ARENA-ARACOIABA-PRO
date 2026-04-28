@@ -64,17 +64,11 @@ class MatchDetailViewModel(
 
             delay(3000)
             // Simula Cartão Amarelo
-            handleEventAction(
-                type = "CARD_YELLOW",
-                playerName = "Carlos Silva",
-                description = "Falta tática"
-            )
+            handleEventAction("CARD_YELLOW", "Carlos Silva", "Falta tática")
 
             delay(5000)
             // Simula GOL
-            val matchWithGoalA = _uiState.value.match?.copy(scoreA = 1)
-            _uiState.update { it.copy(match = matchWithGoalA) }
-            
+            _uiState.update { it.copy(match = it.match?.copy(scoreA = 1)) }
             handleEventAction(
                 type = "GOAL",
                 playerName = "Roberto",
@@ -84,8 +78,7 @@ class MatchDetailViewModel(
 
             delay(5000)
             // Simula Segundo GOL
-            val matchWithGoalB = matchWithGoalA?.copy(scoreB = 1)
-            _uiState.update { it.copy(match = matchWithGoalB) }
+            _uiState.update { it.copy(match = it.match?.copy(scoreB = 1)) }
 
             handleEventAction(
                 type = "GOAL",
@@ -96,12 +89,11 @@ class MatchDetailViewModel(
 
             delay(5000)
             // Finaliza a partida
-            val finishedMatch = _uiState.value.match?.copy(
+            _uiState.update { it.copy(match = it.match?.copy(
                 status = "FINISHED",
                 period = "FIM",
                 finishedAt = com.google.firebase.Timestamp.now()
-            )
-            _uiState.update { it.copy(match = finishedMatch, isLive = false) }
+            ), isLive = false) }
         }
     }
 
