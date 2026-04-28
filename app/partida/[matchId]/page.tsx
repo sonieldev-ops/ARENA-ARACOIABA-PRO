@@ -11,7 +11,7 @@ import { Loader2, Trophy, Bell, BellOff, ArrowLeft, MapPin, Calendar, Timer } fr
 import { useFavorites } from '@/src/modules/users/hooks/useFavorites';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { sanitizeData } from '@/src/lib/utils';
+import { sanitizeData, cn } from '@/src/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { OfficialMatchSummary } from '@/src/modules/match/components/OfficialMatchSummary';
 import { collection, query, where, orderBy, onSnapshot as onSnapshotQuery } from 'firebase/firestore';
