@@ -5,7 +5,7 @@ import { db } from '@/src/lib/firebase/client';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
 import { Loader2, Calendar, Zap, Trophy, MapPin, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { sanitizeData } from '@/src/lib/utils';
+import { sanitizeData, cn } from '@/src/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { SponsorBanner } from '@/src/modules/sponsors/components/SponsorBanner';
 
