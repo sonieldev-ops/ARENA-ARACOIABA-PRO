@@ -40,12 +40,13 @@ class MatchDetailViewModel(
         viewModelScope.launch {
             val mockMatch = Match(
                 id = matchId,
-                teamAName = "Leões do Norte",
-                teamBName = "Guerreiros",
-                scoreA = 0,
+                teamAName = "Vila",
+                teamBName = "Sonifc",
+                scoreA = 1,
                 scoreB = 0,
                 status = "LIVE",
                 period = "1T",
+                championshipId = "TRABALHADORES",
                 startedAt = com.google.firebase.Timestamp.now()
             )
             
@@ -73,8 +74,8 @@ class MatchDetailViewModel(
                 description = "Golaço de fora da área!"
             )
             val updatedMatch = mockMatch.copy(scoreA = 1)
-            detectNewGoals(listOf(goal))
-            _uiState.update { it.copy(match = updatedMatch, events = listOf(goal, yellowCard)) }
+            _uiState.update { it.copy(match = updatedMatch) }
+            updateEvents(listOf(goal, yellowCard))
 
             delay(5000)
             // Simula Segundo GOL
@@ -87,8 +88,8 @@ class MatchDetailViewModel(
                 description = "Empate no último minuto!"
             )
             val finalMatch = updatedMatch.copy(scoreB = 1)
-            detectNewGoals(listOf(goal2, goal, yellowCard))
-            _uiState.update { it.copy(match = finalMatch, events = listOf(goal2, goal, yellowCard)) }
+            _uiState.update { it.copy(match = finalMatch) }
+            updateEvents(listOf(goal2, goal, yellowCard))
 
             delay(5000)
             // Finaliza a partida
@@ -108,15 +109,12 @@ class MatchDetailViewModel(
                 repository.observeMatchEvents(matchId)
             ) { match, events ->
                 if (match != null) {
-                    detectNewGoals(events)
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            match = match,
-                            events = events,
-                            isLive = match.status == "LIVE"
-                        )
-                    }
+                    _uiState.update { it.copy(
+                        isLoading = false,
+                        match = match,
+                        isLive = match.status == "LIVE"
+                    )}
+                    updateEvents(events)
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Partida não encontrada") }
                 }
@@ -128,26 +126,39 @@ class MatchDetailViewModel(
 
     private fun startTimer() {
         viewModelScope.launch {
-            while (true) {
-                val match = _uiState.value.match
-                val startedAt = match?.startedAt?.toDate()
-                
-                if (match?.status == "LIVE" && startedAt != null) {
-                    val elapsed = (System.currentTimeMillis() - startedAt.time) / 1000
-                    _uiState.update { it.copy(elapsedSeconds = elapsed.toInt()) }
+            // Otimização: O loop do timer só é ativado quando a partida está AO VIVO
+            // Isso reduz a carga no Looper do Android e evita conflitos de sincronização.
+            _uiState.map { it.isLive }.distinctUntilChanged().collectLatest { isLive ->
+                if (isLive) {
+                    while (true) {
+                        val match = _uiState.value.match
+                        val startedAt = match?.startedAt?.toDate()
+                        if (startedAt != null) {
+                            val elapsed = (System.currentTimeMillis() - startedAt.time) / 1000
+                            _uiState.update { it.copy(elapsedSeconds = elapsed.toInt()) }
+                        }
+                        delay(1000)
+                    }
                 }
-                delay(1000)
             }
         }
     }
 
-    private fun detectNewGoals(events: List<MatchEvent>) {
-        val newGoals = events.filter { it.type == "GOAL" && !knownGoalEvents.contains(it.id) }
+    /**
+     * Centraliza a atualização de eventos, garantindo ordenação e detecção de gols.
+     * A ordenação decrescente (mais recentes primeiro) evita que os cards se sobreponham visualmente.
+     */
+    private fun updateEvents(events: List<MatchEvent>) {
+        val sortedEvents = events.sortedByDescending { it.minute }
+        
+        val newGoals = sortedEvents.filter { it.type == "GOAL" && !knownGoalEvents.contains(it.id) }
         if (newGoals.isNotEmpty()) {
             val lastGoal = newGoals.maxByOrNull { it.minute }
             lastGoal?.let { triggerGoalAnimation(it) }
             newGoals.forEach { knownGoalEvents.add(it.id) }
         }
+
+        _uiState.update { it.copy(events = sortedEvents) }
     }
 
     private fun triggerGoalAnimation(event: MatchEvent) {

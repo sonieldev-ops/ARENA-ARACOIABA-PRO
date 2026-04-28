@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sonielguedes.arenaaracoiabapro.data.model.Match
 import com.sonielguedes.arenaaracoiabapro.data.model.MatchEvent
+import com.sonielguedes.arenaaracoiabapro.ui.components.ArenaBadge
+import com.sonielguedes.arenaaracoiabapro.ui.components.BadgeType
 import com.sonielguedes.arenaaracoiabapro.ui.components.SectionHeader
 import com.sonielguedes.arenaaracoiabapro.ui.theme.*
 import java.text.SimpleDateFormat
@@ -40,10 +42,14 @@ fun MatchDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("DETALHES DA PARTIDA", color = ArenaGold, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                title = { Text(uiState.match?.championshipId ?: "DETALHES", color = ArenaGold, fontSize = 16.sp, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = ArenaGold)
+                    TextButton(onClick = onBack) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar", tint = ArenaGold, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("VOLTAR", color = ArenaGold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = ArenaBlack)
@@ -117,7 +123,7 @@ fun MatchContent(match: Match, events: List<MatchEvent>, elapsedSeconds: Int, pa
 fun ScoreBoard(match: Match, elapsedSeconds: Int) {
     val currentTimeMillis = System.currentTimeMillis()
     val displayTime = remember(match.startedAt, match.period, currentTimeMillis) {
-        if (match.startedAt == null) return@remember match.period ?: "AO VIVO"
+        if (match.startedAt == null) return@remember match.period ?: ""
         
         val diffMinutes = (currentTimeMillis - match.startedAt.toDate().time) / 60000
         val baseMinutes = if (diffMinutes < 0) 0 else diffMinutes.toInt()
@@ -128,7 +134,7 @@ fun ScoreBoard(match: Match, elapsedSeconds: Int) {
                 val secondHalfMin = baseMinutes + 45
                 if (secondHalfMin > 90) "90+${secondHalfMin - 90}'" else "${secondHalfMin}'"
             }
-            "INT", "INTERVALO" -> "INTERVALO"
+            "INT", "INTERVALO" -> "INT"
             else -> "${baseMinutes}'"
         }
     }
@@ -148,37 +154,37 @@ fun ScoreBoard(match: Match, elapsedSeconds: Int) {
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (match.status == "LIVE") {
-                LiveBadge(displayTime, periodLabel)
-                Spacer(Modifier.height(16.dp))
+            // Time A
+            TeamDisplay(match.teamAName, -1) // -1 para ocultar o score aqui
+
+            // Status e Placar Central
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (match.status == "LIVE") {
+                    ArenaBadge(text = periodLabel, type = BadgeType.G4) // Usando azul como no print
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(match.scoreA.toString(), color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Black)
+                    Text(" : ", color = ArenaMuted, fontSize = 32.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
+                    Text(match.scoreB.toString(), color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Black)
+                }
+
+                if (match.status == "FINISHED") {
+                    ArenaBadge(text = "FINALIZADO", type = BadgeType.FINISHED)
+                } else if (match.status == "SCHEDULED") {
+                    ArenaBadge(text = "AGUARDANDO", type = BadgeType.NEXT)
+                } else if (match.status == "LIVE" && displayTime.isNotEmpty()) {
+                    Text(displayTime, color = ArenaGold, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TeamDisplay(match.teamAName, match.scoreA)
-                Text("X", color = ArenaGold, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-                TeamDisplay(match.teamBName, match.scoreB)
-            }
-            
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = when(match.status) {
-                    "FINISHED" -> "FINALIZADO"
-                    "SCHEDULED" -> "AGUARDANDO"
-                    "LIVE" -> periodLabel
-                    else -> match.status
-                } + (match.scheduledAt?.toDate()?.let { 
-                    " - " + SimpleDateFormat("dd/MM HH:mm", Locale.getDefault()).format(it)
-                } ?: ""),
-                color = ArenaMuted,
-                fontSize = 14.sp
-            )
+            // Time B
+            TeamDisplay(match.teamBName, -1)
         }
     }
 }
@@ -188,16 +194,18 @@ fun TeamDisplay(name: String, score: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(80.dp)
                 .clip(CircleShape)
                 .background(ArenaBorder),
             contentAlignment = Alignment.Center
         ) {
-            Text(name.take(1).uppercase(), color = ArenaGold, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(name.take(2).uppercase(), color = ArenaGold, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         }
-        Spacer(Modifier.height(8.dp))
-        Text(name, color = ArenaText, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-        Text(score.toString(), color = ArenaText, fontSize = 36.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(12.dp))
+        Text(name.uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, letterSpacing = 1.sp)
+        if (score >= 0) {
+            Text(score.toString(), color = ArenaText, fontSize = 36.sp, fontWeight = FontWeight.Black)
+        }
     }
 }
 
