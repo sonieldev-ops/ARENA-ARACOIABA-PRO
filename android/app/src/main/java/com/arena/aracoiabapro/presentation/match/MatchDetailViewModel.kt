@@ -8,6 +8,7 @@ import com.sonielguedes.arenaaracoiabapro.data.repository.MatchRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class MatchDetailUiState(
     val isLoading: Boolean = true,
@@ -31,6 +32,14 @@ class MatchDetailViewModel(
 
     private val knownEvents = mutableSetOf<String>()
 
+    /**
+     * Calcula o minuto atual da partida baseado nos segundos decorridos.
+     * Futebol: 0-59s é o minuto 1, 60-119s é o minuto 2, etc.
+     */
+    private fun getCurrentMatchMinute(): Int {
+        return (uiState.value.elapsedSeconds / 60) + 1
+    }
+
     init {
         // loadMatchDetails() // Comentado para simulação
         simulateMatch()
@@ -43,7 +52,7 @@ class MatchDetailViewModel(
                 id = matchId,
                 teamAName = "Vila",
                 teamBName = "Sonifc",
-                scoreA = 1,
+                scoreA = 0,
                 scoreB = 0,
                 status = "LIVE",
                 period = "1T",
@@ -55,46 +64,39 @@ class MatchDetailViewModel(
 
             delay(3000)
             // Simula Cartão Amarelo
-            val yellowCard = MatchEvent(
-                id = "e1",
+            handleEventAction(
                 type = "CARD_YELLOW",
-                minute = 15,
                 playerName = "Carlos Silva",
                 description = "Falta tática"
             )
-            _uiState.update { it.copy(events = listOf(yellowCard)) }
 
             delay(5000)
             // Simula GOL
-            val goal = MatchEvent(
-                id = "e2",
+            val matchWithGoalA = _uiState.value.match?.copy(scoreA = 1)
+            _uiState.update { it.copy(match = matchWithGoalA) }
+            
+            handleEventAction(
                 type = "GOAL",
-                minute = 32,
-                teamId = "", // Simulando para o time A
                 playerName = "Roberto",
-                description = "Golaço de fora da área!"
+                description = "Golaço de fora da área!",
+                teamId = "home"
             )
-            val updatedMatch = mockMatch.copy(scoreA = 1)
-            _uiState.update { it.copy(match = updatedMatch) }
-            updateEvents(listOf(goal, yellowCard))
 
             delay(5000)
             // Simula Segundo GOL
-            val goal2 = MatchEvent(
-                id = "e3",
+            val matchWithGoalB = matchWithGoalA?.copy(scoreB = 1)
+            _uiState.update { it.copy(match = matchWithGoalB) }
+
+            handleEventAction(
                 type = "GOAL",
-                minute = 45,
-                teamId = "away", // Simulando para o time B
                 playerName = "Souza",
-                description = "Empate no último minuto!"
+                description = "Empate no último minuto!",
+                teamId = "away"
             )
-            val finalMatch = updatedMatch.copy(scoreB = 1)
-            _uiState.update { it.copy(match = finalMatch) }
-            updateEvents(listOf(goal2, goal, yellowCard))
 
             delay(5000)
             // Finaliza a partida
-            val finishedMatch = finalMatch.copy(
+            val finishedMatch = _uiState.value.match?.copy(
                 status = "FINISHED",
                 period = "FIM",
                 finishedAt = com.google.firebase.Timestamp.now()
@@ -143,6 +145,32 @@ class MatchDetailViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Função chamada pela UI quando o usuário aperta um botão de ação (Gol, Cartão, etc).
+     * Ela captura automaticamente o minuto da partida no momento do clique.
+     */
+    fun handleEventAction(
+        type: String,
+        playerName: String,
+        description: String,
+        teamId: String = ""
+    ) {
+        val currentMinute = getCurrentMatchMinute()
+        val newEvent = MatchEvent(
+            id = UUID.randomUUID().toString(),
+            type = type,
+            minute = currentMinute,
+            playerName = playerName,
+            description = description,
+            teamId = teamId
+        )
+
+        // Em produção, aqui você chamaria o repository para salvar no Firestore
+        // repository.addMatchEvent(matchId, newEvent)
+        
+        updateEvents(uiState.value.events + newEvent)
     }
 
     /**
