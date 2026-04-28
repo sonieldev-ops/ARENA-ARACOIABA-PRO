@@ -2,6 +2,7 @@ package com.sonielguedes.arenaaracoiabapro.presentation.match
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,14 +22,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sonielguedes.arenaaracoiabapro.data.model.Match
 import com.sonielguedes.arenaaracoiabapro.data.model.MatchEvent
+import com.sonielguedes.arenaaracoiabapro.presentation.live.components.GoalCelebrationOverlay
 import com.sonielguedes.arenaaracoiabapro.ui.components.ArenaBadge
 import com.sonielguedes.arenaaracoiabapro.ui.components.BadgeType
 import com.sonielguedes.arenaaracoiabapro.ui.components.SectionHeader
 import com.sonielguedes.arenaaracoiabapro.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
-
-import com.sonielguedes.arenaaracoiabapro.presentation.live.components.GoalCelebrationOverlay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,10 +141,10 @@ fun ScoreBoard(match: Match, elapsedSeconds: Int) {
 
     val periodLabel = remember(match.period) {
         when (match.period) {
-            "1T" -> "1º TEMPO"
-            "2T" -> "2º TEMPO"
+            "1T" -> "1T"
+            "2T" -> "2T"
             "INT", "INTERVALO" -> "INT"
-            else -> "AO VIVO"
+            else -> ""
         }
     }
 
@@ -154,93 +154,126 @@ fun ScoreBoard(match: Match, elapsedSeconds: Int) {
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 32.dp, horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Time A
-            TeamDisplay(match.teamAName, -1) // -1 para ocultar o score aqui
+            // Status Badge Superior
+            if (match.status == "LIVE") {
+                ArenaBadge(
+                    text = "AO VIVO • ${periodLabel}",
+                    type = BadgeType.LIVE,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            } else if (match.status == "FINISHED") {
+                ArenaBadge(
+                    text = "FINALIZADO",
+                    type = BadgeType.FINISHED,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            } else if (match.status == "SCHEDULED") {
+                ArenaBadge(
+                    text = "AGENDADO",
+                    type = BadgeType.NEXT,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+            }
 
-            // Status e Placar Central
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (match.status == "LIVE") {
-                    ArenaBadge(text = periodLabel, type = BadgeType.G4) // Usando azul como no print
+            // Placar Principal Horizontal
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Time A
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TeamIcon(name = match.teamAName)
                     Spacer(Modifier.height(8.dp))
+                    Text(
+                        match.teamAName.uppercase(),
+                        color = ArenaMuted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(match.scoreA.toString(), color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Black)
-                    Text(" : ", color = ArenaMuted, fontSize = 32.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
-                    Text(match.scoreB.toString(), color = Color.White, fontSize = 64.sp, fontWeight = FontWeight.Black)
+                // Score Central
+                Row(
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        match.scoreA.toString(),
+                        color = Color.White,
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    
+                    Text(
+                        "VS",
+                        color = ArenaBorder,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Black,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Text(
+                        match.scoreB.toString(),
+                        color = Color.White,
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Black
+                    )
                 }
 
-                if (match.status == "FINISHED") {
-                    ArenaBadge(text = "FINALIZADO", type = BadgeType.FINISHED)
-                } else if (match.status == "SCHEDULED") {
-                    ArenaBadge(text = "AGUARDANDO", type = BadgeType.NEXT)
-                } else if (match.status == "LIVE" && displayTime.isNotEmpty()) {
-                    Text(displayTime, color = ArenaGold, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                // Time B
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TeamIcon(name = match.teamBName)
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        match.teamBName.uppercase(),
+                        color = ArenaMuted,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
                 }
             }
 
-            // Time B
-            TeamDisplay(match.teamBName, -1)
+            if (match.status == "LIVE" && displayTime.isNotEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    displayTime,
+                    color = ArenaGold,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 2.sp
+                )
+            }
         }
     }
 }
 
 @Composable
-fun TeamDisplay(name: String, score: Int) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(ArenaBorder),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(name.take(2).uppercase(), color = ArenaGold, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(12.dp))
-        Text(name.uppercase(), color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, letterSpacing = 1.sp)
-        if (score >= 0) {
-            Text(score.toString(), color = ArenaText, fontSize = 36.sp, fontWeight = FontWeight.Black)
-        }
-    }
-}
-
-@Composable
-fun LiveBadge(displayTime: String, periodLabel: String) {
-    val infiniteTransition = rememberInfiniteTransition(label = "live")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Surface(
-            color = ArenaRed.copy(alpha = alpha),
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Text(
-                "AO VIVO",
-                color = Color.White,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(Modifier.width(8.dp))
+fun TeamIcon(name: String) {
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(ArenaBorder.copy(alpha = 0.3f))
+            .border(1.dp, ArenaBorder, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+    ) {
         Text(
-            displayTime,
-            color = ArenaGold,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Black
+            name.take(1).uppercase(),
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }

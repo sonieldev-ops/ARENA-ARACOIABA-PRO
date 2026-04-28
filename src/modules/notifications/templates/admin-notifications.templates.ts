@@ -52,6 +52,16 @@ export const ADMIN_NOTIFICATION_TEMPLATES: Record<NotificationType, (data: any) 
     body: data.message || 'Houve uma atualização na sua partida.',
     priority: NotificationPriority.NORMAL
   }),
+  [NotificationType.MATCH_GOAL]: (data) => ({
+    title: 'GOOOOOOOL! ⚽',
+    body: `${data.teamName} marcou aos ${data.minute}'! Autor: ${data.playerName}`,
+    priority: NotificationPriority.HIGH
+  }),
+  [NotificationType.MATCH_CARD]: (data) => ({
+    title: `${data.cardType === 'RED' ? 'Cartão Vermelho! 🟥' : 'Cartão Amarelo 🟨'}`,
+    body: `${data.playerName} (${data.teamName}) recebeu aos ${data.minute}'.`,
+    priority: NotificationPriority.NORMAL
+  }),
   [NotificationType.CHAMPIONSHIP_ALERT]: (data) => ({
     title: 'Alerta de Campeonato',
     body: data.message || 'Novidades no seu campeonato.',

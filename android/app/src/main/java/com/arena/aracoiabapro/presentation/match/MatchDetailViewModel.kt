@@ -17,7 +17,8 @@ data class MatchDetailUiState(
     val elapsedSeconds: Int = 0,
     val error: String? = null,
     val showGoalAnimation: Boolean = false,
-    val lastGoalEvent: MatchEvent? = null
+    val lastGoalEvent: MatchEvent? = null,
+    val activeAlert: MatchEvent? = null
 )
 
 class MatchDetailViewModel(
@@ -28,7 +29,7 @@ class MatchDetailViewModel(
     private val _uiState = MutableStateFlow(MatchDetailUiState())
     val uiState: StateFlow<MatchDetailUiState> = _uiState.asStateFlow()
 
-    private val knownGoalEvents = mutableSetOf<String>()
+    private val knownEvents = mutableSetOf<String>()
 
     init {
         // loadMatchDetails() // Comentado para simulação
@@ -151,21 +152,32 @@ class MatchDetailViewModel(
     private fun updateEvents(events: List<MatchEvent>) {
         val sortedEvents = events.sortedByDescending { it.minute }
         
-        val newGoals = sortedEvents.filter { it.type == "GOAL" && !knownGoalEvents.contains(it.id) }
-        if (newGoals.isNotEmpty()) {
-            val lastGoal = newGoals.maxByOrNull { it.minute }
-            lastGoal?.let { triggerGoalAnimation(it) }
-            newGoals.forEach { knownGoalEvents.add(it.id) }
+        val newImportantEvents = sortedEvents.filter { 
+            (it.type == "GOAL" || it.type.startsWith("CARD_")) && !knownEvents.contains(it.id) 
+        }
+
+        if (newImportantEvents.isNotEmpty()) {
+            // Pegamos o evento mais recente (o primeiro da lista ordenada) para exibir o alerta
+            val latestEvent = newImportantEvents.first()
+            triggerEventAlert(latestEvent)
+            newImportantEvents.forEach { knownEvents.add(it.id) }
         }
 
         _uiState.update { it.copy(events = sortedEvents) }
     }
 
-    private fun triggerGoalAnimation(event: MatchEvent) {
+    private fun triggerEventAlert(event: MatchEvent) {
         viewModelScope.launch {
-            _uiState.update { it.copy(showGoalAnimation = true, lastGoalEvent = event) }
-            delay(4000)
-            _uiState.update { it.copy(showGoalAnimation = false) }
+            if (event.type == "GOAL") {
+                _uiState.update { it.copy(showGoalAnimation = true, lastGoalEvent = event) }
+                delay(4000)
+                _uiState.update { it.copy(showGoalAnimation = false) }
+            } else if (event.type.startsWith("CARD_")) {
+                // Exibe um alerta visual para cartões amarelos e vermelhos
+                _uiState.update { it.copy(activeAlert = event) }
+                delay(3000)
+                _uiState.update { it.copy(activeAlert = null) }
+            }
         }
     }
 }
