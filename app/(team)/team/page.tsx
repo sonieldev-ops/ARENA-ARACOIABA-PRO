@@ -115,7 +115,7 @@ export default function TeamManagerDashboardPage() {
                 <div className="relative z-10">
                   <h3 className="font-bold mb-2">Dica de Gestor</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Mantenha seu elenco atualizado. Apenas jogadores ativos com status "ACTIVE" podem ser escalados em súmulas de partidas oficiais.
+                    Mantenha seu elenco atualizado. Apenas jogadores ativos com status &quot;ACTIVE&quot; podem ser escalados em súmulas de partidas oficiais.
                   </p>
                 </div>
                 <div className="absolute -right-4 -bottom-4 opacity-10">

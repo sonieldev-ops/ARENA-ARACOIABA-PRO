@@ -1,38 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback } from 'react';
 import { collection, query, orderBy, limit, onSnapshot, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase/client';
 import { toast } from 'sonner';
 import { Trophy, AlertCircle, Users, Activity } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+
+interface GameEvent {
+  type: string;
+  playerName?: string;
+  [key: string]: unknown;
+}
 
 export function LiveEventToaster() {
-  useEffect(() => {
-    // Ouvir apenas eventos criados a partir de AGORA
-    const startTime = Timestamp.now();
-    
-    const q = query(
-      collection(db, 'eventos_partida'),
-      where('timestamp', '>', startTime),
-      orderBy('timestamp', 'desc'),
-      limit(1)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added') {
-          const event = change.doc.data();
-          showEventToast(event);
-        }
-      });
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const showEventToast = (event: any) => {
-    const icons: Record<string, any> = {
+  const showEventToast = useCallback((event: GameEvent) => {
+    const icons: Record<string, React.ReactNode> = {
       'GOAL': <Trophy className="w-5 h-5 text-yellow-500" />,
       'YELLOW_CARD': <AlertCircle className="w-5 h-5 text-yellow-400" />,
       'RED_CARD': <AlertCircle className="w-5 h-5 text-red-500" />,
@@ -81,7 +64,30 @@ export function LiveEventToaster() {
         </button>
       </motion.div>
     ), { duration: 5000, position: 'top-right' });
-  };
+  }, []);
+
+  useEffect(() => {
+    // Ouvir apenas eventos criados a partir de AGORA
+    const startTime = Timestamp.now();
+
+    const q = query(
+      collection(db, 'eventos_partida'),
+      where('timestamp', '>', startTime),
+      orderBy('timestamp', 'desc'),
+      limit(1)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const event = change.doc.data() as GameEvent;
+          showEventToast(event);
+        }
+      });
+    });
+
+    return () => unsubscribe();
+  }, [showEventToast]);
 
   return null;
 }

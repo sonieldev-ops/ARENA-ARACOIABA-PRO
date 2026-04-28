@@ -1,7 +1,7 @@
 import { cert, getApp, getApps, initializeApp, App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
-import { getMessaging } from "firebase-admin/messaging";
+import { Auth, getAuth } from "firebase-admin/auth";
+import { Firestore, getFirestore } from "firebase-admin/firestore";
+import { Messaging, getMessaging } from "firebase-admin/messaging";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name];
@@ -41,7 +41,7 @@ try {
   console.error("❌ [Firebase Admin] Erro ao inicializar:", error);
 }
 
-export const adminAuth = adminApp ? getAuth(adminApp) : null as any;
-export const adminDb = adminApp ? getFirestore(adminApp) : null as any;
-export const adminMessaging = adminApp ? getMessaging(adminApp) : null as any;
+export const adminAuth = (adminApp ? getAuth(adminApp) : null) as Auth;
+export const adminDb = (adminApp ? getFirestore(adminApp) : null) as Firestore;
+export const adminMessaging = (adminApp ? getMessaging(adminApp) : null) as Messaging;
 export { adminApp };

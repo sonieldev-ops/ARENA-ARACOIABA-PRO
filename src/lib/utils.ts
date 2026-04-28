@@ -1,48 +1,60 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+/**
+ * Utility to merge tailwind classes safely.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function sanitizeData(data: any): any {
+/**
+ * Sanitizes data from Firestore to be safe for React state and serialization.
+ * Removes internal Firebase objects that can cause issues.
+ */
+export function sanitizeData(data: unknown): any {
   if (data === null || data === undefined) return data;
 
+  const d = data as any;
+
   // 1. Se for um Timestamp do Firestore (tem .toDate()), mantemos intacto
-  if (typeof data.toDate === 'function') {
-    return data;
+  if (typeof d.toDate === 'function') {
+    return d;
   }
 
   // 2. Detectar e neutralizar objetos internos do Firebase que quebram o React (FieldValue, DocumentReference, etc)
-  if (typeof data === 'object') {
-    if (data._methodName || data.bc !== undefined || data.firestore !== undefined) {
+  if (typeof d === 'object') {
+    if (d._methodName || d.bc !== undefined || d.firestore !== undefined) {
       return "";
     }
   }
 
   // Handle Firestore Timestamp (Literal object from serialization)
-  if (data._seconds !== undefined || data.seconds !== undefined) {
-    const s = data._seconds ?? data.seconds;
+  if (d._seconds !== undefined || d.seconds !== undefined) {
+    const s = d._seconds ?? d.seconds;
     return new Date(s * 1000).toISOString();
   }
 
-  if (Array.isArray(data)) {
-    return data.map(sanitizeData);
+  if (Array.isArray(d)) {
+    return d.map(sanitizeData);
   }
 
-  if (typeof data === 'object') {
-    const sanitized: any = {};
-    for (const key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        sanitized[key] = sanitizeData(data[key]);
+  if (typeof d === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const key in d) {
+      if (Object.prototype.hasOwnProperty.call(d, key)) {
+        sanitized[key] = sanitizeData(d[key]);
       }
     }
     return sanitized;
   }
 
-  return data;
+  return d;
 }
 
+/**
+ * Formats a Firebase Timestamp or Date into a Brazilian Portuguese locale string.
+ */
 export function formatFirebaseDate(date: any): string {
   if (!date) return "";
 
@@ -81,30 +93,38 @@ export function formatFirebaseDate(date: any): string {
 
   // Se for string ISO ou timestamp number
   try {
-    return new Date(date).toLocaleDateString("pt-BR", {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return String(date);
+    return d.toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  } catch (e) {
+  } catch {
     return String(date);
   }
 }
 
+/**
+ * Recursively removes undefined values from an object.
+ * Useful before sending data to Firestore which doesn't allow undefined.
+ */
 export function removeUndefined<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') {
     return obj;
   }
 
+  const d = obj as any;
+
   // Evitar processar objetos internos do Firebase (FieldValue, Timestamp)
-  if ((obj as any)._methodName || typeof (obj as any).toDate === 'function') {
+  if (d._methodName || typeof d.toDate === 'function') {
     return obj;
   }
 
   if (Array.isArray(obj)) {
-    return obj
+    return (obj as any[])
       .filter((v) => v !== undefined)
       .map((v) => removeUndefined(v)) as unknown as T;
   }
@@ -186,12 +206,12 @@ export const translateEventType = (type: string): string => {
 };
 
 /**
- * Registra uma ação crítica no log de auditoria do sistema.
+ * Registers a critical action in the system audit log.
  */
-export async function logSystemAction(db: any, user: any, action: string, details: string, extra: any = {}) {
+export async function logSystemAction(db: unknown, user: any, action: string, details: string, extra: Record<string, unknown> = {}) {
   try {
     const { addDoc, collection, serverTimestamp } = await import('firebase/firestore');
-    await addDoc(collection(db, 'system_audit_logs'), {
+    await addDoc(collection(db as any, 'system_audit_logs'), {
       userId: user?.uid || 'SYSTEM',
       userName: user?.fullName || user?.displayName || 'Sistema',
       email: user?.email || 'N/A',

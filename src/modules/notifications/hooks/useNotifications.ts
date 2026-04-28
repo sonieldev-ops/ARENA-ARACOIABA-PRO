@@ -9,7 +9,7 @@ import { QueryDocumentSnapshot } from 'firebase/firestore';
 export function useNotifications(userId: string | undefined, initialFilters: NotificationFilterState = {}) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [filters, setFilters] = useState<NotificationFilterState>(initialFilters);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | undefined>(undefined);
@@ -17,8 +17,11 @@ export function useNotifications(userId: string | undefined, initialFilters: Not
   const loadNotifications = useCallback(async (isNextPage = false) => {
     if (!userId) return;
 
-    if (isNextPage) setLoadingMore(true);
-    else setLoading(true);
+    if (isNextPage) {
+      setLoadingMore(true);
+    } else {
+      setLoading(true);
+    }
 
     try {
       const result = await notificationsService.listNotifications(
@@ -39,8 +42,25 @@ export function useNotifications(userId: string | undefined, initialFilters: Not
     }
   }, [userId, filters, lastDoc]);
 
+  // Efeito para carga inicial e mudanças de filtro
   useEffect(() => {
-    loadNotifications();
+    if (userId) {
+      // Usamos um timeout ou microtask para evitar o erro de cascading render se necessário,
+      // mas aqui apenas chamamos a função.
+      // O linter reclama se loadNotifications não estiver nas deps.
+      const initialLoad = async () => {
+        await notificationsService.listNotifications(userId, filters, 20)
+          .then(result => {
+             setNotifications(result.notifications);
+             setLastDoc(result.lastVisible);
+             setHasMore(result.notifications.length === 20);
+             setLoading(false);
+          });
+      };
+
+      setLoading(true);
+      initialLoad();
+    }
   }, [userId, filters]);
 
   const markAsRead = async (id: string) => {

@@ -1,17 +1,18 @@
 import { adminDb, adminAuth } from "@/src/lib/firebase/admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue, Query, DocumentData, QuerySnapshot } from "firebase-admin/firestore";
 import { logAudit } from "./audit.service";
 import { removeUndefined } from "@/src/lib/utils";
+import { UserProfile } from "@/src/types/auth";
 
 export class UsersAdminService {
   async list(filters: { role?: string; status?: string } = {}) {
-    let query: any = adminDb.collection("usuarios");
+    let query: Query<DocumentData> = adminDb.collection("usuarios");
 
     if (filters.role) query = query.where("role", "==", filters.role);
     if (filters.status) query = query.where("status", "==", filters.status);
 
-    const snapshot = await query.orderBy("createdAt", "desc").get();
-    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const snapshot: QuerySnapshot<DocumentData> = await query.orderBy("createdAt", "desc").get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile & { id: string }));
   }
 
   async updateUserRole(userId: string, role: string, operatorId: string) {
@@ -54,7 +55,7 @@ export class UsersAdminService {
     const snapshot = await adminDb.collection("usuarios")
       .where("status", "==", "PENDING_APPROVAL")
       .get();
-    return snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserProfile & { id: string }));
   }
 }
 

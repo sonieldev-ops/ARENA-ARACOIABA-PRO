@@ -31,8 +31,8 @@ export interface AuditLogItem {
   source: AuditSource;
   correlationId: string;
   reason?: string;
-  before?: Partial<UserProfile> | any;
-  after?: Partial<UserProfile> | any;
+  before?: Partial<UserProfile>;
+  after?: Partial<UserProfile>;
   metadata?: {
     ip?: string;
     userAgent?: string;

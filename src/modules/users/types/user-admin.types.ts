@@ -1,4 +1,4 @@
-import { UserRole, UserStatus } from '@/src/types/auth';
+import { UserRole, UserStatus, BaseTimestamp } from '@/src/types/auth';
 
 export interface UserAdminRow {
   uid: string;
@@ -10,11 +10,11 @@ export interface UserAdminRow {
   isApproved: boolean;
   approvalRequired: boolean;
   requestedRole?: UserRole;
-  createdAt: any;
-  updatedAt: any;
-  lastRoleChangeAt?: any;
+  createdAt: BaseTimestamp | Date;
+  updatedAt: BaseTimestamp | Date;
+  lastRoleChangeAt?: BaseTimestamp | Date;
   lastRoleChangeBy?: string;
-  lastApprovalAt?: any;
+  lastApprovalAt?: BaseTimestamp | Date;
   lastApprovalBy?: string;
   blockedReason?: string;
   suspensionReason?: string;

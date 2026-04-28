@@ -18,6 +18,11 @@ export enum UserStatus {
   DEACTIVATED = "DEACTIVATED",
 }
 
+export interface BaseTimestamp {
+  seconds: number;
+  nanoseconds: number;
+}
+
 export interface UserSession {
   id: string;
   name: string;
@@ -43,18 +48,18 @@ export interface UserProfile {
   championshipIds?: string[];
   city?: string;
   photoUrl?: string;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: BaseTimestamp | Date;
+  updatedAt: BaseTimestamp | Date;
   createdBy?: string;
-  lastRoleChangeAt?: any;
+  lastRoleChangeAt?: BaseTimestamp | Date;
   lastRoleChangeBy?: string;
-  lastApprovalAt?: any;
+  lastApprovalAt?: BaseTimestamp | Date;
   lastApprovalBy?: string;
   blockedReason?: string;
   suspensionReason?: string;
   metadata?: {
-    lastLogin?: any;
+    lastLogin?: BaseTimestamp | Date;
     appVersion?: string;
   };
-  preferences?: Record<string, any>;
+  preferences?: Record<string, unknown>;
 }

@@ -9,9 +9,7 @@ import {
   where,
   orderBy,
   limit,
-  doc,
-  setDoc,
-  deleteDoc
+  Timestamp
 } from 'firebase/firestore';
 import { 
   Trophy, 
@@ -20,7 +18,6 @@ import {
   ChevronRight,
   Target,
   Activity,
-  Bell,
   Star,
   Share2,
   Play,
@@ -38,22 +35,80 @@ import { sanitizeData, formatFirebaseDate, cn } from '@/src/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/src/modules/auth/context/AuthContext';
 import { useFavorites } from '@/src/modules/users/hooks/useFavorites';
 import { toast } from 'sonner';
 import { FavoriteButton } from './FavoriteButton';
+import Image from 'next/image';
+
+interface Championship {
+  id: string;
+  name: string;
+  season?: string;
+  category?: string;
+  status: string;
+}
+
+interface Match {
+  id: string;
+  status: string;
+  teamAId: string;
+  teamAName: string;
+  teamBId: string;
+  teamBName: string;
+  scoreA: number;
+  scoreB: number;
+  currentPeriod?: string;
+  liveStreamUrl?: string;
+  scheduledDate?: Timestamp;
+  location?: string;
+}
+
+interface Standing {
+  id: string;
+  name: string;
+  points: number;
+  victories: number;
+  goalDifference: number;
+  played: number;
+}
+
+interface Scorer {
+  id: string;
+  fullName?: string;
+  name?: string;
+  athleteName?: string;
+  teamName: string;
+  goals: number;
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  content?: string;
+  message?: string;
+  createdAt: Timestamp;
+}
+
+interface Sponsor {
+  id: string;
+  name: string;
+  logoUrl: string;
+  link?: string;
+  active: boolean;
+}
 
 export function FanHubHome() {
   const { user } = useAuth();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
-  const [activeChampionships, setActiveChampionships] = useState<any[]>([]);
-  const [liveMatches, setLiveMatches] = useState<any[]>([]);
-  const [upcomingMatches, setUpcomingMatches] = useState<any[]>([]);
-  const [standings, setStandings] = useState<any[]>([]);
-  const [scorers, setScorers] = useState<any[]>([]);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [sponsors, setSponsors] = useState<any[]>([]);
+  const [activeChampionships, setActiveChampionships] = useState<Championship[]>([]);
+  const [liveMatches, setLiveMatches] = useState<Match[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
+  const [standings, setStandings] = useState<Standing[]>([]);
+  const [scorers, setScorers] = useState<Scorer[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState(true);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
@@ -61,13 +116,13 @@ export function FanHubHome() {
     // 1. Campeonatos Ativos
     const qChamps = query(collection(db, 'campeonatos'), where('status', 'in', ['ACTIVE', 'OPEN', 'SCHEDULED']));
     const unsubChamps = onSnapshot(qChamps, (snap) => {
-      setActiveChampionships(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setActiveChampionships(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Championship));
     });
 
     // 2. Jogos Ao Vivo
     const qLive = query(collection(db, 'partidas'), where('status', '==', 'LIVE'));
     const unsubLive = onSnapshot(qLive, (snap) => {
-      setLiveMatches(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setLiveMatches(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Match));
     });
 
     // 3. Próximos Jogos
@@ -78,15 +133,14 @@ export function FanHubHome() {
       limit(10)
     );
     const unsubUpcoming = onSnapshot(qUpcoming, (snap) => {
-      setUpcomingMatches(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setUpcomingMatches(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Match));
     });
 
-    // 4. Classificação (Geral ou do primeiro campeonato ativo)
+    // 4. Classificação
     const qStandings = query(collection(db, 'classificacoes'), orderBy('points', 'desc'), limit(10));
     const unsubStandings = onSnapshot(qStandings, (snap) => {
-      const data = snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }));
-      // Ordenação manual similar ao admin para consistência
-      data.sort((a: any, b: any) => {
+      const data = snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Standing);
+      data.sort((a, b) => {
         if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
         if ((b.victories || 0) !== (a.victories || 0)) return (b.victories || 0) - (a.victories || 0);
         return (b.goalDifference || 0) - (a.goalDifference || 0);
@@ -97,19 +151,19 @@ export function FanHubHome() {
     // 5. Artilharia
     const qScorers = query(collection(db, 'atletas'), where('goals', '>', 0), orderBy('goals', 'desc'), limit(5));
     const unsubScorers = onSnapshot(qScorers, (snap) => {
-      setScorers(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setScorers(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Scorer));
     });
 
     // 6. Avisos
     const qAnnouncements = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(3));
     const unsubAnnouncements = onSnapshot(qAnnouncements, (snap) => {
-      setAnnouncements(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setAnnouncements(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Announcement));
     });
 
     // 7. Patrocinadores
     const qSponsors = query(collection(db, 'sponsors'), where('active', '==', true));
     const unsubSponsors = onSnapshot(qSponsors, (snap) => {
-      setSponsors(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() })));
+      setSponsors(snap.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }) as Sponsor));
       setLoading(false);
     });
 
@@ -122,7 +176,7 @@ export function FanHubHome() {
     try {
       await toggleFavorite(teamId);
       toast.success(isFavorite(teamId) ? `${teamName} removido` : `${teamName} favoritado!`);
-    } catch (e) {
+    } catch {
       toast.error("Faça login para favoritar times");
     }
   };
@@ -133,6 +187,9 @@ export function FanHubHome() {
         title: 'Arena Araçoiaba Pro',
         text: 'Acompanhe o campeonato na Arena Araçoiaba!',
         url: window.location.href,
+      }).catch(() => {
+        navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copiado!");
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
@@ -154,7 +211,6 @@ export function FanHubHome() {
 
   return (
     <div className="min-h-screen bg-[#05070A] text-white pb-24 font-sans">
-      {/* Premium Header */}
       <header className="sticky top-0 z-50 bg-[#05070A]/90 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -208,14 +264,10 @@ export function FanHubHome() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-8">
-        
-        {/* Featured Championship Hero */}
         {activeChampionships.length > 0 && !showOnlyFavorites && (
           <section className="relative rounded-[2rem] overflow-hidden bg-zinc-900 border border-white/5 aspect-[16/9] md:aspect-[21/7]">
              <div className="absolute inset-0 bg-gradient-to-t from-[#05070A] via-[#05070A]/40 to-transparent z-10" />
              <div className="absolute inset-0 bg-gradient-to-r from-[#05070A] via-transparent to-transparent z-10" />
-
-             {/* Fake Hero Image/Pattern */}
              <div className="absolute inset-0 opacity-30 grayscale mix-blend-overlay bg-[url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80')] bg-cover bg-center" />
 
              <div className="absolute inset-0 z-20 p-6 md:p-12 flex flex-col justify-end items-start space-y-4">
@@ -238,7 +290,6 @@ export function FanHubHome() {
           </section>
         )}
 
-        {/* Live Matches Slider/Grid */}
         {filteredLive.length > 0 && (
           <section className="space-y-4">
             <SectionHeader title="Ao Vivo" icon={<Zap className="w-4 h-4 fill-emerald-500 text-emerald-500" />} color="emerald" />
@@ -257,10 +308,7 @@ export function FanHubHome() {
         )}
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Main Content (Left/Center) */}
           <div className="lg:col-span-2 space-y-8">
-
-            {/* Announcements */}
             {announcements.length > 0 && !showOnlyFavorites && (
               <section className="space-y-4">
                 <SectionHeader title="Avisos Oficiais" icon={<Megaphone className="w-4 h-4" />} />
@@ -283,7 +331,6 @@ export function FanHubHome() {
               </section>
             )}
 
-            {/* Upcoming Matches */}
             <section className="space-y-4">
               <SectionHeader title={showOnlyFavorites ? "Meus Próximos Jogos" : "Próximos Jogos"} icon={<Calendar className="w-4 h-4" />} />
               <div className="space-y-3">
@@ -310,10 +357,8 @@ export function FanHubHome() {
             </section>
           </div>
 
-          {/* Sidebar (Right) */}
           {!showOnlyFavorites && (
             <div className="space-y-8">
-              {/* Standings Mini */}
               <section className="space-y-4">
                 <SectionHeader title="Classificação" icon={<TrendingUp className="w-4 h-4" />} />
                 <div className="bg-zinc-900/50 border border-white/5 rounded-2xl overflow-hidden">
@@ -358,7 +403,6 @@ export function FanHubHome() {
                 </div>
               </section>
 
-              {/* Top Scorers */}
               <section className="space-y-4">
                 <SectionHeader title="Artilharia" icon={<Target className="w-4 h-4 text-red-600" />} />
                 <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 space-y-4">
@@ -384,15 +428,13 @@ export function FanHubHome() {
           )}
         </div>
 
-
-        {/* Sponsors */}
         {sponsors.length > 0 && (
           <section className="pt-12 border-t border-white/5 space-y-6">
             <span className="block text-center text-[10px] font-black text-zinc-600 uppercase tracking-[0.4em]">Patrocinadores Oficiais</span>
             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all">
               {sponsors.map((s) => (
-                <a key={s.id} href={s.link || '#'} target="_blank" rel="noopener noreferrer">
-                   <img src={s.logoUrl} alt={s.name} className="h-8 md:h-12 w-auto object-contain" />
+                <a key={s.id} href={s.link || '#'} target="_blank" rel="noopener noreferrer" className="relative h-8 md:h-12 w-32">
+                   <Image src={s.logoUrl} alt={s.name} fill className="object-contain" unoptimized />
                 </a>
               ))}
             </div>
@@ -400,7 +442,6 @@ export function FanHubHome() {
         )}
       </main>
 
-      {/* Floating Action Menu for Fans */}
       <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-sm">
         <div className="bg-zinc-950/80 backdrop-blur-2xl border border-white/10 rounded-full p-2 flex items-center justify-between shadow-2xl">
           <NavItem href="/" icon={<Trophy className="w-5 h-5" />} active />
@@ -435,7 +476,14 @@ function SectionHeader({ title, icon, color = "white" }: { title: string, icon?:
   );
 }
 
-function LiveMatchCard({ match, onFavorite, isFavoriteA, isFavoriteB }: any) {
+interface LiveMatchProps {
+  match: Match;
+  onFavorite: (id: string, name: string) => void;
+  isFavoriteA: boolean;
+  isFavoriteB: boolean;
+}
+
+function LiveMatchCard({ match, onFavorite, isFavoriteA, isFavoriteB }: LiveMatchProps) {
   return (
     <Card className="bg-zinc-900 border-emerald-500/20 rounded-[2rem] overflow-hidden group hover:border-emerald-500/50 transition-all shadow-xl shadow-emerald-500/5 relative">
       <div className="absolute top-0 right-0 p-4 flex gap-2 z-20">
@@ -483,7 +531,7 @@ function LiveMatchCard({ match, onFavorite, isFavoriteA, isFavoriteB }: any) {
   );
 }
 
-function TeamMini({ teamName, score, reverse, isFav }: any) {
+function TeamMini({ teamName, score, reverse, isFav }: { teamName: string, score: number, reverse?: boolean, isFav: boolean }) {
   return (
     <div className={cn("flex items-center gap-4 flex-1", reverse && "flex-row-reverse")}>
        <div className={cn(
@@ -500,7 +548,7 @@ function TeamMini({ teamName, score, reverse, isFav }: any) {
   );
 }
 
-function UpcomingMatchRow({ match, onFavorite, isFavoriteA, isFavoriteB }: any) {
+function UpcomingMatchRow({ match, onFavorite, isFavoriteA, isFavoriteB }: LiveMatchProps) {
   const dateStr = formatFirebaseDate(match.scheduledDate);
   const dateParts = dateStr.split(' ');
   const dayMonth = dateParts[0] ? dateParts[0].substring(0, 5) : '--/--';
@@ -579,4 +627,3 @@ function EmptyState({ message, icon }: { message: string, icon?: React.ReactNode
     </div>
   );
 }
-

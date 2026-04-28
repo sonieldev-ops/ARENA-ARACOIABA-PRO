@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { sanitizeData } from "@/src/lib/utils";
 import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -70,7 +71,7 @@ export default function ChampionshipsAdminPage() {
       setIsCreating(false);
       fetchChampionships();
     } catch (error) {
-      alert('Erro ao criar campeonato. Verifique as permissões.');
+      toast.error('Erro ao criar campeonato. Verifique as permissões.');
     }
   };
 
@@ -97,7 +98,7 @@ export default function ChampionshipsAdminPage() {
       setShowConfigModal(false);
       fetchChampionships();
     } catch (e) {
-      alert('Erro ao salvar configuração.');
+      toast.error('Erro ao salvar configuração.');
     } finally {
       setSavingConfig(false);
     }
@@ -114,7 +115,7 @@ export default function ChampionshipsAdminPage() {
       fetchChampionships();
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      alert('Erro ao atualizar status.');
+      toast.error('Erro ao atualizar status.');
     }
   };
 

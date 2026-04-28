@@ -1,5 +1,15 @@
-import { MatchEventType } from "@prisma/client";
 import { LiveMatchState, MatchEvent } from "../entities/types";
+
+export type MatchEventType = 
+  | 'MATCH_STARTED' 
+  | 'HALF_TIME_STARTED' 
+  | 'SECOND_HALF_STARTED' 
+  | 'GOAL' 
+  | 'OWN_GOAL' 
+  | 'PENALTY_SCORED' 
+  | 'MATCH_ENDED' 
+  | 'WO_DECLARED' 
+  | 'STATUS_CHANGED';
 
 /**
  * Reducer puro que projeta o novo estado da partida a partir de um evento.

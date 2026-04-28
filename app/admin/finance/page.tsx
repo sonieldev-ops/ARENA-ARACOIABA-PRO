@@ -34,7 +34,7 @@ export default function FinanceAdminPage() {
       const champs = champSnap.docs.map(d => ({ id: d.id, ...d.data() }));
       setChampionships(champs);
 
-      let teamQuery = query(collection(db, 'times'), orderBy('createdAt', 'desc'));
+      const teamQuery = query(collection(db, 'times'), orderBy('createdAt', 'desc'));
       const teamSnap = await getDocs(teamQuery);
       let teamList = teamSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
 

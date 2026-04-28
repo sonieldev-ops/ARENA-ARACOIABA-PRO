@@ -8,7 +8,9 @@ import {
   startAfter,
   Timestamp,
   doc,
-  getDoc
+  getDoc,
+  QueryDocumentSnapshot,
+  DocumentSnapshot
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import { AuditLogItem, AuditFilterState, AuditSummary } from '../types/audit-report.types';
@@ -19,11 +21,11 @@ export class AuditReportService {
   /**
    * Lista logs de auditoria com filtros e paginação
    */
-  async listAuditLogs(
-    filters: AuditFilterState,
-    pageSize: number = 50,
-    lastDoc?: any
-  ): Promise<{ items: AuditLogItem[]; lastVisible: any }> {
+    async listAuditLogs(
+      filters: AuditFilterState,
+      pageSize: number = 50,
+      lastDoc?: QueryDocumentSnapshot | DocumentSnapshot | null
+    ): Promise<{ items: AuditLogItem[]; lastVisible: QueryDocumentSnapshot | DocumentSnapshot | null }> {
     let q = query(collection(db, AUDIT_COLLECTION));
 
     // Filtros de Data (Essenciais para performance e custo)

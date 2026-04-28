@@ -259,14 +259,14 @@ export default function MatchesAdminPage() {
       await deleteDoc(doc(db, 'partidas', id));
       fetchData();
     } catch (error) {
-      alert('Erro ao excluir partida');
+      toast.error('Erro ao excluir partida');
     }
   };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedChampId || !teamAId || !teamBId || !matchDate || !matchTime || teamAId === teamBId) {
-      alert('Preencha todos os campos corretamente. Os times devem ser diferentes.');
+      toast.error('Preencha todos os campos corretamente. Os times devem ser diferentes.');
       return;
     }
 
@@ -316,7 +316,7 @@ export default function MatchesAdminPage() {
       fetchData();
     } catch (error) {
       console.error(error);
-      alert('Erro ao processar partida.');
+      toast.error('Erro ao processar partida.');
     }
   };
 

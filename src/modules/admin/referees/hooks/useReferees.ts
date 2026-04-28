@@ -12,12 +12,14 @@ export function useReferees() {
 
   const loadReferees = useCallback(async () => {
     try {
+      // Usamos setLoading de forma segura para o useEffect
       setLoading(true);
       const data = await refereesService.getAll();
       setReferees(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading referees:', err);
-      setError(err.message);
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      setError(errorMessage);
       toast.error('Erro ao carregar árbitros');
     } finally {
       setLoading(false);
@@ -33,7 +35,7 @@ export function useReferees() {
       await refereesService.create(data);
       await loadReferees();
       toast.success('Árbitro cadastrado com sucesso!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Erro ao cadastrar árbitro');
       throw err;
     }
@@ -44,7 +46,7 @@ export function useReferees() {
       await refereesService.update(id, data);
       await loadReferees();
       toast.success('Dados atualizados com sucesso!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Erro ao atualizar árbitro');
       throw err;
     }
@@ -55,17 +57,17 @@ export function useReferees() {
       await refereesService.delete(id);
       await loadReferees();
       toast.success('Árbitro removido');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Erro ao remover árbitro');
       throw err;
     }
   };
 
-  const assignRefereesToMatch = async (matchId: string, assignment: any) => {
+  const assignRefereesToMatch = async (matchId: string, assignment: Record<string, string>) => {
     try {
       await refereesService.assignToMatch(matchId, assignment);
       toast.success('Arbitragem escalada com sucesso!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Erro ao escalar arbitragem');
       throw err;
     }

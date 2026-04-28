@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/src/modules/auth/context/AuthContext';
 import { db, auth } from '@/src/lib/firebase/client';
 import { doc, updateDoc, onSnapshot } from 'firebase/firestore';
-import { sendPasswordResetEmail, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   User,
-  Mail,
   Shield,
-  Calendar,
-  Phone,
-  Activity,
   Loader2,
   Lock,
   Key,
@@ -28,31 +24,19 @@ import {
   Settings,
   Bell,
   Languages,
-  Database,
   Eye,
-  LogOut,
-  MapPin,
-  Building,
-  History,
   Clock,
-  Laptop
+  Laptop,
+  History
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn, formatFirebaseDate, translateRole, translateStatus } from '@/src/lib/utils';
-import { UserRole, UserStatus } from '@/src/types/auth';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { UserRole, UserProfile } from '@/src/types/auth';
+import Image from 'next/image';
 
 export default function AdminProfilePage() {
   const { user: authUser, loading: authLoading } = useAuth();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -66,15 +50,15 @@ export default function AdminProfilePage() {
   useEffect(() => {
     if (!authUser?.uid) return;
 
-    const unsub = onSnapshot(doc(db, 'usuarios', authUser.uid), (doc) => {
-      if (doc.exists()) {
-        const data = doc.data();
-        setUser({ id: doc.id, ...data });
+    const unsub = onSnapshot(doc(db, 'usuarios', authUser.uid), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as UserProfile;
+        setUser({ ...data, uid: docSnap.id });
         setFullName(data.fullName || '');
         setPhone(data.phone || '');
         setCity(data.city || '');
         setState(data.state || '');
-        setOrganization(data.organizationName || '');
+        setOrganization((data as any).organizationName || '');
       }
       setLoading(false);
     });
@@ -88,7 +72,7 @@ export default function AdminProfilePage() {
 
     setSaving(true);
     try {
-      await updateDoc(doc(db, 'usuarios', user.id), {
+      await updateDoc(doc(db, 'usuarios', user.uid), {
         fullName,
         phone,
         city,
@@ -111,6 +95,7 @@ export default function AdminProfilePage() {
       await sendPasswordResetEmail(auth, user.email);
       toast.success("E-mail de redefinição de senha enviado!");
     } catch (error) {
+      console.error(error);
       toast.error("Erro ao enviar e-mail de redefinição.");
     }
   };
@@ -132,7 +117,7 @@ export default function AdminProfilePage() {
   const permissions = [
     { label: 'Criar campeonatos', allowed: isAdmin },
     { label: 'Editar campeonatos', allowed: isAdmin },
-    { label: 'Gerenciar partidas', allowed: isAdmin || user.role === 'REFEREE' },
+    { label: 'Gerenciar partidas', allowed: isAdmin || user.role === UserRole.REFEREE },
     { label: 'Gerenciar árbitros', allowed: isAdmin },
     { label: 'Gerenciar financeiro', allowed: isSuperAdmin },
     { label: 'Reset database', allowed: isSuperAdmin, critical: true },
@@ -142,7 +127,7 @@ export default function AdminProfilePage() {
     <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-32">
       <AdminPageHeader
         title="Configurações de Perfil"
-        subtitle="Gerencie sua conta e visualize suas permissões administrativas."
+        description="Gerencie sua conta e visualize suas permissões administrativas."
       />
 
       {/* 1. Header do Perfil */}
@@ -150,9 +135,9 @@ export default function AdminProfilePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-red-600/10 to-transparent blur-3xl -z-10" />
         <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-[2.5rem] bg-slate-900 border-2 border-slate-800 flex items-center justify-center text-5xl font-black italic text-red-600 shadow-2xl overflow-hidden group-hover:border-red-600/50 transition-all">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.fullName} className="w-full h-full object-cover" />
+            <div className="w-32 h-32 rounded-[2.5rem] bg-slate-900 border-2 border-slate-800 flex items-center justify-center text-5xl font-black italic text-red-600 shadow-2xl overflow-hidden group-hover:border-red-600/50 transition-all relative">
+              {user.photoUrl ? (
+                <Image src={user.photoUrl} alt={user.fullName} fill className="object-cover" unoptimized />
               ) : (
                 user.fullName?.substring(0, 2).toUpperCase()
               )}
@@ -165,14 +150,14 @@ export default function AdminProfilePage() {
           <div className="text-center md:text-left space-y-2">
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
               <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">{user.fullName}</h2>
-              <Badge className="bg-amber-500 text-black font-black text-[10px] tracking-widest px-4 py-1 rounded-full uppercase">
+              <Badge className="bg-amber-500 text-black font-black text-[10px] tracking-widest px-4 py-1 rounded-full uppercase border-none">
                 {translateRole(user.role)}
               </Badge>
             </div>
             <p className="text-slate-400 font-medium">{user.email}</p>
             <div className="flex gap-4 pt-2">
               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                <Clock className="w-3.5 h-3.5" /> Último login: {user.lastLoginAt ? formatFirebaseDate(user.lastLoginAt) : 'Recentemente'}
+                <Clock className="w-3.5 h-3.5" /> Último login: {user.metadata?.lastLogin ? formatFirebaseDate(user.metadata.lastLogin) : 'Recentemente'}
               </div>
               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-500">
                 <Shield className="w-3.5 h-3.5" /> Conta {translateStatus(user.status)}
@@ -202,7 +187,7 @@ export default function AdminProfilePage() {
                     <Input
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600"
+                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -211,19 +196,19 @@ export default function AdminProfilePage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="(00) 00000-0000"
-                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600"
+                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 text-white"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">E-mail (Somente Leitura)</Label>
-                    <Input value={user.email} disabled className="bg-slate-950 border-slate-800 rounded-xl opacity-50 cursor-not-allowed" />
+                    <Input value={user.email} disabled className="bg-slate-950 border-slate-800 rounded-xl opacity-50 cursor-not-allowed text-white" />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Organização / Arena</Label>
                     <Input
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
-                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600"
+                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -231,7 +216,7 @@ export default function AdminProfilePage() {
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600"
+                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 text-white"
                     />
                   </div>
                   <div className="space-y-2">
@@ -240,7 +225,7 @@ export default function AdminProfilePage() {
                       value={state}
                       onChange={(e) => setState(e.target.value)}
                       maxLength={2}
-                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 uppercase"
+                      className="bg-slate-950 border-slate-800 rounded-xl focus:ring-red-600 uppercase text-white"
                     />
                   </div>
                 </div>
@@ -322,7 +307,7 @@ export default function AdminProfilePage() {
 
               <div className="p-4 bg-amber-500/5 border border-amber-500/10 rounded-2xl flex gap-3">
                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
-                 <p className="text-[9px] text-amber-500/80 font-bold uppercase leading-relaxed">
+                 <p className="text-[9px] text-amber-500/80 font-bold uppercase leading-relaxed text-amber-600">
                    Ações críticas como Reset de Database exigem reautenticação imediata por motivos de segurança.
                  </p>
               </div>

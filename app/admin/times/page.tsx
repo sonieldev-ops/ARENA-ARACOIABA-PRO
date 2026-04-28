@@ -18,6 +18,7 @@ import {
 import { sanitizeData } from "@/src/lib/utils";
 import { AdminPageHeader } from '@/src/modules/admin/components/AdminPageHeader';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function TeamsAdminPage() {
   const [teams, setTeams] = useState<any[]>([]);
@@ -61,7 +62,7 @@ export default function TeamsAdminPage() {
       setLogoUrl(url);
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao fazer upload da logo.');
+      toast.error('Erro ao fazer upload da logo.');
     } finally {
       setUploading(false);
     }
@@ -105,7 +106,7 @@ export default function TeamsAdminPage() {
       fetchData();
     } catch (error) {
       console.error(error);
-      alert('Erro ao salvar time.');
+      toast.error('Erro ao salvar time.');
     }
   };
 
@@ -126,7 +127,7 @@ export default function TeamsAdminPage() {
       fetchData();
     } catch (error) {
       console.error('Erro ao excluir equipe:', error);
-      alert('Erro ao excluir equipe.');
+      toast.error('Erro ao excluir equipe.');
     }
   };
 

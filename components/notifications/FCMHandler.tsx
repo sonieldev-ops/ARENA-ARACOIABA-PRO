@@ -2,8 +2,27 @@
 
 import { useEffect } from 'react';
 import { useAuth } from '@/src/modules/auth/context/AuthContext';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, WebGLUtils } from '@capacitor/core';
 import { toast } from 'sonner';
+
+interface CapacitorPlugins {
+  PushNotifications?: {
+    checkPermissions: () => Promise<{ receive: string }>;
+    requestPermissions: () => Promise<{ receive: string }>;
+    register: () => Promise<void>;
+    addListener: (eventName: string, callback: (data: any) => void) => void;
+  };
+}
+
+interface PushRegistrationToken {
+  value: string;
+}
+
+interface PushNotificationReceived {
+  title?: string;
+  body?: string;
+  data?: Record<string, unknown>;
+}
 
 export function FCMHandler() {
   const { user } = useAuth();
@@ -18,10 +37,8 @@ export function FCMHandler() {
 
   const registerCapacitorPush = async (userId: string) => {
     try {
-      // Uso de strings e acesso global para evitar falha de build por falta do pacote
-      // Em tempo de execução no Android, o Capacitor proverá os plugins se configurado
-      const globalCap = (window as any).Capacitor;
-      const PushNotifications = globalCap?.Plugins?.PushNotifications;
+      const plugins = (Capacitor as any).Plugins as CapacitorPlugins;
+      const PushNotifications = plugins?.PushNotifications;
 
       if (!PushNotifications) {
         console.warn('[FCM] Plugin PushNotifications não injetado pelo Capacitor.');
@@ -38,7 +55,7 @@ export function FCMHandler() {
 
       await PushNotifications.register();
 
-      PushNotifications.addListener('registration', async (token: any) => {
+      PushNotifications.addListener('registration', async (token: PushRegistrationToken) => {
         await fetch('/api/notifications/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -50,7 +67,7 @@ export function FCMHandler() {
         });
       });
 
-      PushNotifications.addListener('pushNotificationReceived', (notification: any) => {
+      PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationReceived) => {
         toast(notification.title || 'Alerta Arena Pro', {
           description: notification.body,
         });

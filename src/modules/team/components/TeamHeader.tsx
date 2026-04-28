@@ -1,14 +1,21 @@
 import { Team } from "../types/team.types";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Trophy, Users } from "lucide-react";
+import Image from "next/image";
 
 export function TeamHeader({ team, memberCount }: { team: Team; memberCount: number }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-2xl border shadow-sm mb-8">
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-slate-50">
+        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-slate-50 relative overflow-hidden">
           {team.logoUrl ? (
-            <img src={team.logoUrl} alt={team.name} className="w-full h-full object-cover rounded-xl" />
+            <Image
+              src={team.logoUrl}
+              alt={team.name}
+              fill
+              className="object-cover rounded-xl"
+              unoptimized
+            />
           ) : (
             <Shield className="h-8 w-8 text-slate-300" />
           )}

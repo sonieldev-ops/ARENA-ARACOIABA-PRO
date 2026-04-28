@@ -8,7 +8,8 @@ import {
   Timestamp,
   startAt,
   endAt,
-  getCountFromServer
+  getCountFromServer,
+  QueryConstraint
 } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase/client';
 import { UserRole, UserStatus } from '@/src/types/auth';
@@ -16,7 +17,8 @@ import {
   GovernanceSummary,
   GovernanceFilterState,
   GovernanceKpi,
-  RecentAuditItem
+  RecentAuditItem,
+  GovernanceAlert
 } from '../types/governance.types';
 
 export class GovernanceDashboardService {
@@ -63,7 +65,7 @@ export class GovernanceDashboardService {
     };
   }
 
-  private async getCount(coll: string, ...queryConstraints: any[]) {
+  private async getCount(coll: string, ...queryConstraints: QueryConstraint[]) {
     const collRef = collection(db, coll);
     const q = query(collRef, ...queryConstraints);
     const snapshot = await getCountFromServer(q);
@@ -130,8 +132,8 @@ export class GovernanceDashboardService {
     return combined.slice(0, limitCount);
   }
 
-  private generateAlerts(pending: number, blocked: number): any[] {
-    const alerts = [];
+  private generateAlerts(pending: number, blocked: number): GovernanceAlert[] {
+    const alerts: GovernanceAlert[] = [];
     if (pending > 10) {
       alerts.push({
         id: 'too-many-pending',

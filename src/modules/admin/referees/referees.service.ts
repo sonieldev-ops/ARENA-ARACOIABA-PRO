@@ -57,14 +57,14 @@ export const refereesService = {
     await deleteDoc(docRef);
   },
 
-  async assignToMatch(matchId: string, assignment: any): Promise<void> {
+  async assignToMatch(matchId: string, assignment: Record<string, string>): Promise<void> {
     const matchRef = doc(db, 'partidas', matchId);
 
     // Preparar o objeto de árbitros com nomes para denormalização se necessário
-    const refereeDetails: any = {};
+    const refereeDetails: Record<string, string | number> = {};
 
     // Mapeamento de chaves da tela para chaves do banco
-    const mapping: any = {
+    const mapping: Record<string, string> = {
       main: 'main',
       assistant1: 'assistant1',
       assistant2: 'assistant2',
@@ -74,18 +74,19 @@ export const refereesService = {
 
     for (const [key, refereeId] of Object.entries(assignment)) {
       if (refereeId) {
-        const refData = await this.getById(refereeId as string);
+        const refData = await this.getById(refereeId);
         if (refData) {
           const dbKey = mapping[key];
-          refereeDetails[`referees.${dbKey}`] = refereeId;
-          refereeDetails[`referees.${dbKey}Name`] = refData.fullName;
+          if (dbKey) {
+            refereeDetails[`referees.${dbKey}`] = refereeId;
+            refereeDetails[`referees.${dbKey}Name`] = refData.fullName;
 
-          // Opcional: Incrementar contador de jogos do árbitro (idealmente via Cloud Function ou transação)
-          // Aqui faremos simples para o MVP
-          await this.update(refereeId as string, {
-            gamesCount: (refData.gamesCount || 0) + 1,
-            lastMatchDate: new Date().toISOString().split('T')[0]
-          });
+            // Opcional: Incrementar contador de jogos do árbitro
+            await this.update(refereeId, {
+              gamesCount: (refData.gamesCount || 0) + 1,
+              lastMatchDate: new Date().toISOString().split('T')[0]
+            });
+          }
         }
       }
     }
