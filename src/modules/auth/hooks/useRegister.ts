@@ -21,7 +21,7 @@ export function useRegister() {
     try {
       await authService.register(data);
       toast.success('Cadastro realizado! Sua conta está em análise.');
-      router.replace('/pending-approval');
+      router.replace('/aguardando-aprovacao');
     } catch (err: any) {
       const msg = authService.getFriendlyErrorMessage(err);
       setError(msg);

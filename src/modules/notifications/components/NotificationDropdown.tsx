@@ -82,7 +82,7 @@ export const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ user
 
       <div className="p-3 bg-gray-50 text-center border-t border-gray-100">
         <Link
-          href="/notifications"
+          href="/notificacoes"
           onClick={onClose}
           className="text-sm font-bold text-brand-600 hover:text-brand-700"
         >

@@ -45,15 +45,15 @@ export const PROTECTED_RULES: ProtectedRule[] = [
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.REFEREE],
   },
   {
-    prefix: '/admin/finance',
+    prefix: '/admin/financeiro',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER],
   },
   {
-    prefix: '/admin/notifications',
+    prefix: '/admin/notificacoes',
     roles: [UserRole.SUPER_ADMIN, UserRole.ORGANIZER, UserRole.STAFF],
   },
   {
-    prefix: '/admin/settings',
+    prefix: '/admin/configuracoes',
     roles: [UserRole.SUPER_ADMIN],
   },
   {

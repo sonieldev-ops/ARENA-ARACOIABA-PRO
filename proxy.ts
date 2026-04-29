@@ -50,8 +50,8 @@ export async function proxy(req: NextRequest) {
     }
 
     // Se pendente de aprovação, só pode acessar rotas permitidas para pendentes
-    if (status === 'PENDING_APPROVAL' && !pathname.startsWith('/pending-approval')) {
-       return NextResponse.redirect(new URL('/pending-approval', req.url));
+    if (status === 'PENDING_APPROVAL' && !pathname.startsWith('/aguardando-aprovacao')) {
+       return NextResponse.redirect(new URL('/aguardando-aprovacao', req.url));
     }
 
     return NextResponse.next();

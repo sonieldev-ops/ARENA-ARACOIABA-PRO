@@ -73,7 +73,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick?: () => void }) {
             <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase text-zinc-600 tracking-widest">Painel de Acesso</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-zinc-900" />
             <DropdownMenuItem className="focus:bg-zinc-900 rounded-xl px-3 py-2.5 cursor-pointer" asChild>
-              <Link href="/admin/profile" className="flex items-center gap-3">
+              <Link href="/admin/perfil" className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-800">
                   <User className="h-4 w-4" />
                 </div>
@@ -81,7 +81,7 @@ export function AdminTopbar({ onMenuClick }: { onMenuClick?: () => void }) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem className="focus:bg-zinc-900 rounded-xl px-3 py-2.5 cursor-pointer" asChild>
-              <Link href="/admin/settings" className="flex items-center gap-3">
+              <Link href="/admin/configuracoes" className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center border border-zinc-800">
                   <Settings className="h-4 w-4" />
                 </div>

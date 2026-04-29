@@ -22,8 +22,8 @@ export const ROLE_ROUTES: Record<UserRole, string[]> = {
     "/admin/atletas",
     "/admin/partidas",
     "/admin/standings",
-    "/admin/finance",
-    "/admin/notifications",
+    "/admin/financeiro",
+    "/admin/notificacoes",
     "/admin",
   ],
   [UserRole.REFEREE]: [
@@ -35,7 +35,7 @@ export const ROLE_ROUTES: Record<UserRole, string[]> = {
     "/admin/times",
     "/admin/atletas",
     "/admin/partidas",
-    "/admin/notifications",
+    "/admin/notificacoes",
     "/admin",
   ],
   [UserRole.TEAM_MANAGER]: [

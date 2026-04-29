@@ -20,9 +20,9 @@ export function AdminQuickActions() {
   ];
 
   const operationalActions = [
-    { label: "AO VIVO / PLACAR", icon: Activity, href: "/admin/live-control", color: "bg-red-600 hover:bg-red-700" },
+    { label: "AO VIVO / PLACAR", icon: Activity, href: "/admin/controle-ao-vivo", color: "bg-red-600 hover:bg-red-700" },
     { label: "Aprovar Usuários", icon: UserPlus, href: "/admin/usuarios/pending", color: "bg-amber-600 hover:bg-amber-700" },
-    { label: "Auditoria", icon: History, href: "/admin/governance", color: "bg-slate-700 hover:bg-slate-800" },
+    { label: "Auditoria", icon: History, href: "/admin/governanca", color: "bg-slate-700 hover:bg-slate-800" },
   ];
 
   return (

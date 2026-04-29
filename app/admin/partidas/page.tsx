@@ -542,7 +542,7 @@ export default function MatchesAdminPage() {
                         className="flex-1 h-8 rounded-lg text-[9px] font-black border-slate-800 hover:bg-blue-600 hover:text-white transition-all uppercase"
                         asChild
                       >
-                          <Link href="/admin/live-control">LIVE</Link>
+                          <Link href="/admin/controle-ao-vivo">LIVE</Link>
                       </Button>
                     )}
                     {match.status === 'FINISHED' && (

@@ -21,7 +21,7 @@ export function useLogin() {
     // 2. Fluxo por Status
     switch (status) {
       case UserStatus.PENDING_APPROVAL:
-        router.replace('/pending-approval');
+        router.replace('/aguardando-aprovacao');
         return;
       case UserStatus.SUSPENDED:
       case UserStatus.BLOCKED:

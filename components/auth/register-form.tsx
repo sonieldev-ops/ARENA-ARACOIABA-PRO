@@ -54,7 +54,7 @@ export function RegisterForm() {
 
       // 5. Redireciona baseado na necessidade de aprovação
       const approvalRequired = body?.user?.approvalRequired === true;
-      router.replace(approvalRequired ? '/pending-approval' : '/admin');
+      router.replace(approvalRequired ? '/aguardando-aprovacao' : '/admin');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao cadastrar');

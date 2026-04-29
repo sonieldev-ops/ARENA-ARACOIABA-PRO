@@ -130,7 +130,7 @@ export default function AdminAuditPage() {
         action={
           <div className="flex gap-2">
              <Button variant="outline" className="border-slate-800 text-slate-400" asChild>
-                <Link href="/admin/settings"><ArrowLeft className="mr-2 h-4 w-4" /> Configurações</Link>
+                <Link href="/admin/configuracoes"><ArrowLeft className="mr-2 h-4 w-4" /> Configurações</Link>
              </Button>
              <Badge className="bg-red-600/10 text-red-500 border-red-500/20 px-4 py-2 font-black uppercase tracking-widest">
                 Acesso Super Admin

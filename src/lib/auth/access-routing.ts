@@ -23,24 +23,24 @@ export function resolveDefaultRouteByAccess(input: AccessState): RoutingResult {
 
   // 1. Verificação de Status Restritivos (Prioridade Máxima)
   if (status === UserStatus.BLOCKED) {
-    return { route: '/access/blocked', kind: 'RESTRICTION', reason: 'User is blocked', forceLogout: true };
+    return { route: '/acesso/bloqueado', kind: 'RESTRICTION', reason: 'Usuário bloqueado', forceLogout: true };
   }
 
   if (status === UserStatus.REJECTED) {
-    return { route: '/access/rejected', kind: 'RESTRICTION', reason: 'User application was rejected' };
+    return { route: '/acesso/rejeitado', kind: 'RESTRICTION', reason: 'Solicitação de cadastro rejeitada' };
   }
 
   if (status === UserStatus.SUSPENDED) {
-    return { route: '/access/suspended', kind: 'RESTRICTION', reason: 'User is temporarily suspended' };
+    return { route: '/acesso/suspenso', kind: 'RESTRICTION', reason: 'Usuário suspenso temporariamente' };
   }
 
   if (status === UserStatus.DEACTIVATED) {
-    return { route: '/access/deactivated', kind: 'RESTRICTION', reason: 'Account deactivated' };
+    return { route: '/acesso/desativado', kind: 'RESTRICTION', reason: 'Conta desativada' };
   }
 
   // 2. Verificação de Aprovação Pendente
   if (!isApproved || status === UserStatus.PENDING_APPROVAL) {
-    return { route: '/pending-approval', kind: 'RESTRICTION', reason: 'Awaiting administrator approval' };
+    return { route: '/aguardando-aprovacao', kind: 'RESTRICTION', reason: 'Aguardando aprovação do administrador' };
   }
 
   // 3. Mapeamento de Dashboard por Role (Apenas usuários ativos e aprovados chegam aqui)
