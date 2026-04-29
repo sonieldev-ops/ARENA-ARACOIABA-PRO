@@ -23,7 +23,7 @@ export default function NewTeamPage() {
   const [formData, setFormData] = useState({
     name: '',
     championshipId: '',
-    city: 'Araçoiaba da Serra',
+    city: 'Arena Pro',
     status: 'ACTIVE' as const
   });
 
@@ -134,7 +134,7 @@ export default function NewTeamPage() {
           <div className="space-y-2">
             <Label className="text-slate-400 font-bold uppercase tracking-wider text-xs">Cidade</Label>
             <Input
-              placeholder="Araçoiaba da Serra"
+              placeholder="Arena Pro"
               className="bg-slate-900 border-slate-800 rounded-xl"
               value={formData.city}
               onChange={e => setFormData({ ...formData, city: e.target.value })}

@@ -41,7 +41,7 @@ export default function ChampionshipDetailPage() {
             <MapPin className="h-5 w-5" />
             <span className="text-sm font-bold uppercase tracking-wider">Cidade</span>
           </div>
-          <p className="text-2xl font-black text-white">Araçoiaba da Serra</p>
+          <p className="text-2xl font-black text-white">Arena Pro</p>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">

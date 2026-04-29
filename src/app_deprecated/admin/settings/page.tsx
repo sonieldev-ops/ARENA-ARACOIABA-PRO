@@ -34,7 +34,7 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-2">
               <Label className="text-slate-400 font-bold">CIDADE SEDE</Label>
-              <Input defaultValue="Araçoiaba da Serra" className="bg-slate-900 border-slate-800 rounded-xl" />
+              <Input defaultValue="Arena Pro" className="bg-slate-900 border-slate-800 rounded-xl" />
             </div>
           </div>
         </section>

@@ -221,7 +221,7 @@ export function FanHubHome() {
               <span className="text-lg font-black tracking-tighter italic uppercase">
                 ARENA <span className="text-red-600">PRO</span>
               </span>
-              <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Araçoiaba da Serra</span>
+              <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-[0.2em]">Arena Pro</span>
             </div>
           </div>
 
